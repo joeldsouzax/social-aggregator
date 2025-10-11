@@ -1,0 +1,17 @@
+.direnv/
+result*
+target
+**/.env
+**/target
+
+# Ignore decrypted SOPS files and common .env files
+*.dec
+*.dec.*
+secrets.*.dec.yaml
+secrets.*.dec.env
+**/secrets.*.dec.yaml
+**/secrets.*.dec.env
+**/*.dec
+**/*.dec.*
+.env
+.envrc.local

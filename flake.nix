@@ -144,8 +144,6 @@
 
       in with pkgs; {
         checks = {
-          inherit auth;
-
           clippy = craneLib.cargoClippy (commonArgs // {
             inherit cargoArtifacts;
             cargoClippyExtraArgs = "--all-targets -- --deny warnings";

@@ -1,0 +1,14 @@
+[workspace]
+resolver = "2"
+
+[workspace.dependencies]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+authors = ["Joel DSouza <joeldsouzax@gmail.com>"]
+repository = "https://github.com/joeldsouzax/social-aggregator"
+
+[workspace.metadata.crane]
+name = "social-aggregator"
