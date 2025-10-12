@@ -19,7 +19,7 @@
     };
   };
   outputs = { self, nixpkgs, nixpkgs-stable, utils, crane, fenix, advisory-db
-    , sops-nix, ... }@inputs:
+    , sops-nix, ... }:
     utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
@@ -236,16 +236,5 @@
             websocat
           ];
         };
-      }) // {
-        nixosConfigurations = {
-          local = inputs.nixpkgs-stable.lib.nixosSystem {
-            system = "x86_64-linux";
-            specialArgs = {
-              inherit inputs;
-              pkgs = inputs.nixpkgs-stable.legacyPackages."x86_64-linux";
-            };
-            modules = [ ./infra/machines/local.nix ];
-          };
-        };
-      };
+      });
 }

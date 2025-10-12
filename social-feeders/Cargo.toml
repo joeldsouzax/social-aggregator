@@ -1,5 +1,5 @@
 [package]
-name = "mastodon"
+name = "social-feeders"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -7,7 +7,7 @@ authors.workspace = true
 repository.workspace = true
 
 [dependencies]
-anyhow = "1.0.100"
+anyhow.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
