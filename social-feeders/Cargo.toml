@@ -8,6 +8,9 @@ repository.workspace = true
 
 [dependencies]
 anyhow.workspace = true
+megalodon.workspace = true
+thiserror.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
+url.workspace = true
