@@ -5,7 +5,7 @@ members = ["aggregator", "commons/workspace-hack", "feeders"]
 [workspace.dependencies]
 anyhow = "1.0.100"
 megalodon = "1.0.3"
-rdkafka = "0.38.0"
+rdkafka = { version = "0.38.0", features = ["cmake-build"] }
 thiserror = "2.0.17"
 tokio = { version = "1.47.1", features = ["full"] }
 tracing = "0.1.41"

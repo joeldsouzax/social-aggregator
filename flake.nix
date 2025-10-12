@@ -205,7 +205,9 @@
               cargo hakari verify
             '';
 
-            nativeBuildInputs = [ cargo-hakari ];
+            # Add cargo-hakari to the inputs from commonArgs
+            nativeBuildInputs = commonArgs.nativeBuildInputs
+              ++ [ pkgs.cargo-hakari ];
           };
 
         };
