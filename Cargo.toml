@@ -10,6 +10,7 @@ anyhow = "1.0.100"
 megalodon = "1.0.3"
 thiserror = "2.0.17"
 url = "2.5.7"
+rdkafka = "0.38.0"
 
 [workspace.package]
 version = "0.1.0"

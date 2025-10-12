@@ -234,6 +234,7 @@
             cargo-edit
             cargo-expand
             websocat
+            kafkactl
           ];
         };
       });

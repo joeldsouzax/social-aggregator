@@ -9,6 +9,7 @@ repository.workspace = true
 [dependencies]
 anyhow.workspace = true
 megalodon.workspace = true
+rdkafka.workspace = true
 thiserror.workspace = true
 tokio.workspace = true
 tracing.workspace = true
