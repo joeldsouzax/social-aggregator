@@ -233,6 +233,7 @@
             age
             cargo-edit
             cargo-expand
+            websocat
           ];
         };
       }) // {
