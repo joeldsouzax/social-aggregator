@@ -1,5 +1,5 @@
 use crate::error::Error;
-use megalodon::mastodon::Mastodon as MastodonClient;
+use megalodon::{Megalodon, mastodon::Mastodon as MastodonClient, streaming::Message};
 use tracing::{info, instrument, warn};
 use url::Url;
 
@@ -29,6 +29,36 @@ impl Mastodon {
         Ok(Mastodon { client })
     }
 
-    #[instrument(err)]
-    pub async fn stream(self) {}
+    #[instrument]
+    pub async fn stream(self) {
+        let streaming = self.client.public_streaming().await;
+        streaming
+            .listen(Box::new(|message| {
+                Box::pin({
+                    async move {
+                        match message {
+                            Message::Update(mes) => {
+                                println!("{:#?}", mes);
+                            }
+                            Message::Notification(mes) => {
+                                println!("{:#?}", mes);
+                            }
+                            Message::Conversation(mes) => {
+                                println!("{:#?}", mes);
+                            }
+                            Message::Delete(mes) => {
+                                println!("message is deleted: {}", mes);
+                            }
+                            Message::StatusUpdate(mes) => {
+                                println!("updated: {:#?}", mes)
+                            }
+                            Message::Heartbeat() => {
+                                println!("heartbeat");
+                            }
+                        }
+                    }
+                })
+            }))
+            .await;
+    }
 }

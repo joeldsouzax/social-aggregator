@@ -1,10 +1,12 @@
 use anyhow::Result;
+use social_feeders::mastodon;
 use std::env;
 use tracing_subscriber::{
     EnvFilter, Layer,
     fmt::{self, format::FmtSpan},
     prelude::*,
 };
+use url::Url;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -15,14 +17,10 @@ async fn main() -> Result<()> {
         .with_filter(filter);
     tracing_subscriber::registry().with(console).init();
 
-    let mastodon_url = env::var("MASTODON_URL")?;
-    let mastodon_access_token = env::var("MASTODON_ACCESS_TOKEN")?;
-
+    let url = env::var("MASTODON_URL")?;
+    let url = Url::parse(&url)?;
+    let token = env::var("MASTODON_ACCESS_TOKEN")?;
+    let mastodon = mastodon::Mastodon::new(url, token)?;
+    mastodon.stream().await;
     Ok(())
 }
-
-// TODO: a client server which creates a websocket request and fetchs statuses.
-// TODO: listens to tokio ctrl+c to stop the connection and gracefully stops the server
-
-// should return a stream of posts
-pub trait SocialFeeder {}
