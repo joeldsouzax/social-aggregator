@@ -1,5 +1,5 @@
 use anyhow::Result;
-use social_feeders::mastodon;
+use feeders::mastodon;
 use std::env;
 use tracing_subscriber::{
     EnvFilter, Layer,

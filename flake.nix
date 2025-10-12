@@ -26,6 +26,7 @@
         inherit (pkgs) lib;
         craneLib = (crane.mkLib pkgs).overrideToolchain
           (fenix.packages.${system}.complete.toolchain);
+
         src = craneLib.cleanCargoSource ./.;
 
         commonArgs = {
@@ -51,6 +52,18 @@
           doCheck = false;
         };
 
+        workspaceSrc = lib.fileset.toSource {
+          root = ./.;
+          fileset = lib.fileset.unions [
+            ./Cargo.toml
+            ./Cargo.lock
+            (craneLib.fileset.commonCargoSources ./feeders)
+            (craneLib.fileset.commonCargoSources ./aggregator)
+            (craneLib.fileset.commonCargoSources ./commons/workspace-hack)
+
+          ];
+        };
+
         mkPackage = name:
           let
             cargoTomlPath = ./${name}/Cargo.toml;
@@ -61,6 +74,7 @@
             version = cargoToml.package.version;
             bin = craneLib.buildPackage (individualCrateArgs // {
               inherit pname version;
+              src = workspaceSrc;
               cargoExtraArgs = "-p ${pname}";
             });
 
@@ -70,7 +84,7 @@
               tag = version;
               contents = [ bin ];
               config = {
-                Env = [ "RUST_LOG=info,tower_http=trace" ];
+                Env = [ ];
                 Cmd = [ "${bin}/bin/${pname}" ];
                 ExposedPorts = { "3000/tcp" = { }; };
                 WorkingDir = "/";
@@ -142,8 +156,12 @@
             };
           };
 
+        feeders = mkPackage "feeders";
+        aggregator = mkPackage "aggregator";
+
       in with pkgs; {
         checks = {
+          inherit feeders aggregator;
           clippy = craneLib.cargoClippy (commonArgs // {
             inherit cargoArtifacts;
             cargoClippyExtraArgs = "--all-targets -- --deny warnings";
@@ -193,7 +211,7 @@
         };
 
         packages = {
-          inherit pu pd i;
+          inherit feeders aggregator pu pd i;
           ## integration test for auth
           integration = pkgs.testers.runNixOSTest ({
             name = "integration-test";
