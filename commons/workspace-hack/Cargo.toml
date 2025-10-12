@@ -9,4 +9,19 @@ categories.workspace = true
 description.workspace = true
 homepage.workspace = true
 
+# The parts of the file between the BEGIN HAKARI SECTION and END HAKARI SECTION comments
+# are managed by hakari.
+
+### BEGIN HAKARI SECTION
 [dependencies]
+smallvec = { version = "1", default-features = false, features = ["const_generics"] }
+
+[build-dependencies]
+proc-macro2 = { version = "1" }
+quote = { version = "1" }
+syn = { version = "2", features = ["extra-traits", "fold", "full", "visit", "visit-mut"] }
+
+[target.x86_64-unknown-linux-gnu.dependencies]
+smallvec = { version = "1", default-features = false, features = ["const_new"] }
+
+### END HAKARI SECTION
