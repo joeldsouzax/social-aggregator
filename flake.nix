@@ -302,6 +302,10 @@
             cargo-expand
             websocat
             kafkactl
+            nodePackages.nodejs
+            nodePackages.pnpm
+            nodePackages.typescript
+            nodePackages.typescript-language-server
           ];
         };
       });
