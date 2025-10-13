@@ -1,27 +1,21 @@
 use axum::response::sse::{Event, KeepAlive, Sse};
 use futures_util::stream::{self, Stream};
-use serde::Serialize;
+
 use std::{convert::Infallible, time::Duration};
 use tokio_stream::StreamExt as _;
 use tracing::instrument;
-use utoipa::ToSchema;
-
-#[derive(Debug, Serialize, ToSchema)]
-pub struct HealthResponse {
-    message: String,
-}
 
 #[utoipa::path(get,
                path = "/post",
                tags = ["External"],
                operation_id = "post",
                responses(
-                   (status = OK, body = HealthResponse, description = "Streaming posts", content_type = "application/json")
+                   (status = OK, body = String,  description = "A stream of Server-Sent Events (SSE).", content_type = "text/event-stream")
                )
 )]
 #[instrument(name = "post", target = "api::post")]
 pub async fn route() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-    let stream = stream::repeat_with(|| Event::default().data("hi!"))
+    let stream = stream::repeat_with(|| Event::default().data("some post information"))
         .map(Ok)
         .throttle(Duration::from_secs(1));
 

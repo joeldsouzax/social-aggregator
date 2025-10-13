@@ -4,7 +4,7 @@ members = ["aggregator", "commons/proto-definitions", "commons/workspace-hack", 
 
 [workspace.dependencies]
 anyhow = "1.0.100"
-axum = { version = "0.8.6", features = ["ws", "macros"] }
+axum = { version = "0.8.6", features = ["ws", "macros", "json"] }
 megalodon = "1.0.3"
 prost = "0.14.1"
 rdkafka = { version = "0.38.0", features = ["cmake-build"] }
