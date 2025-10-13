@@ -8,6 +8,7 @@
     "types": ["vite/client"],
     "skipLibCheck": true,
 
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -16,6 +17,11 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+      
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
