@@ -1,4 +1,5 @@
 mod error;
+mod json;
 mod routes;
 
 use axum::routing::get;
