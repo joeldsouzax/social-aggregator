@@ -18,6 +18,6 @@ pub fn router() -> OpenApiRouter {
 #[derive(OpenApi)]
 #[openapi(
     info(title = "Aggregator", description = "Social Aggregator",),
-    paths(routes::health::route, routes::logout::route,)
+    paths(routes::health::route, routes::post::route,)
 )]
 pub struct ApiDoc;

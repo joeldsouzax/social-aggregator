@@ -20,6 +20,7 @@ utoipa-axum = { version = "0.2.0", features = ["debug"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum", "reqwest"] }
 utoipa-swagger-ui-vendored = "0.1.2"
 tower-http = { version = "0.6.6", features = ["trace"] }
+validator = { version = "0.20.0", features = ["derive"] }
 workspace-hack = { version = "0.1.0", path = "commons/workspace-hack" }
 
 [workspace.package]
