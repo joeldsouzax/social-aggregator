@@ -1,0 +1,11 @@
+#+Title: Aggregator Endpoints
+#+Author: Joel DSouza
+#+Date: October 12, 2025
+#+Email: joeldsouzax@gmail.com
+
+
+* post streaming
+#+begin_src restclient sse
+GET http://localhost:3000/post
+Content-Type: application/json
+#+end_src

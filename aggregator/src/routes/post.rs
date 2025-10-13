@@ -1,6 +1,8 @@
-use crate::{error::Error, json::ValidJson};
-use axum::http::StatusCode;
+use axum::response::sse::{Event, KeepAlive, Sse};
+use futures_util::stream::{self, Stream};
 use serde::Serialize;
+use std::{convert::Infallible, time::Duration};
+use tokio_stream::StreamExt as _;
 use tracing::instrument;
 use utoipa::ToSchema;
 
@@ -17,14 +19,13 @@ pub struct HealthResponse {
                    (status = OK, body = HealthResponse, description = "Streaming posts", content_type = "application/json")
                )
 )]
-#[instrument(name = "health", target = "api::health")]
-pub async fn route() -> Result<(StatusCode, ValidJson<HealthResponse>), Error> {
-    Ok((
-        StatusCode::OK,
-        ValidJson(HealthResponse {
-            message: "ok.".to_owned(),
-        }),
-    ))
+#[instrument(name = "post", target = "api::post")]
+pub async fn route() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+    let stream = stream::repeat_with(|| Event::default().data("hi!"))
+        .map(Ok)
+        .throttle(Duration::from_secs(1));
+
+    Sse::new(stream).keep_alive(KeepAlive::default())
 }
 
 #[cfg(test)]
