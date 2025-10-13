@@ -4,8 +4,29 @@
 #+Email: joeldsouzax@gmail.com
 
 
-* post streaming
-#+begin_src restclient sse
-GET http://localhost:3000/post
+* health check normal
+#+begin_src restclient health
+GET http://localhost:3000/health
 Content-Type: application/json
 #+end_src
+
+#+RESULTS:
+#+begin_example
+,#+BEGIN_SRC js
+{
+  "message": "ok."
+}
+// GET http://localhost:3000/health
+// HTTP/1.1 200 OK
+// content-type: application/json
+// content-length: 17
+// date: Mon, 13 Oct 2025 18:56:33 GMT
+// Request duration: 0.073376s
+,#+END_SRC
+#+end_example
+* post streaming
+#+begin_src restclient :stream t
+GET http://localhost:3000/post
+#+end_src
+
+
