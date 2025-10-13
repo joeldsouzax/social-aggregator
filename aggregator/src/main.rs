@@ -20,6 +20,7 @@ async fn main() -> Result<()> {
         .with_span_events(FmtSpan::CLOSE)
         .with_filter(filter);
     tracing_subscriber::registry().with(console).init();
+    let port = env::var("")?;
     Ok(())
 }
 
