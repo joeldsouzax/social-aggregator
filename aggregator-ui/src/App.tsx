@@ -1,10 +1,27 @@
+import { usePostQuery } from '@/services/aggregator';
 
-function App() {
+export const App = () => {
+  const { data: posts, isLoading, error } = usePostQuery();
+  if (isLoading) {
+    return <div>Connecting to the post stream...</div>;
+  }
+  if (error) {
+    const errorMessage = 'error' in error ? error.error : JSON.stringify(error);
+    return <div>Error connecting to stream: {errorMessage}</div>;
+  }
+
   return (
-    <>
-    <h1>hello</h1>
-    </>
-  )
-}
+    <div>
+      <h1>Live Post Stream</h1>
+      <ul>
+        {posts?.map((post, index) => (
+          <li key={index}>{post}</li>
+        ))}
+      </ul>
+      {(!posts || posts.length === 0) && <p>Waiting for the first post...</p>}
+    </div>
+  );
+};
 
-export default App
+
+export default App;
