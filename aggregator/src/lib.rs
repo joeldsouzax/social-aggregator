@@ -2,17 +2,27 @@ mod error;
 mod json;
 mod routes;
 
-use axum::routing::get;
-use tower_http::trace::TraceLayer;
+use axum::{
+    http::{HeaderValue, Method},
+    routing::get,
+};
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 
 pub fn router() -> OpenApiRouter {
+    let cors_origin = "http://localhost:5173".parse::<HeaderValue>().unwrap();
+
     OpenApiRouter::new()
         .route("/post", get(routes::post))
         .route("/health", get(routes::health))
-        .layer(TraceLayer::new_for_http())
         .fallback(routes::not_found)
+        .layer(
+            CorsLayer::new()
+                .allow_origin(cors_origin)
+                .allow_methods([Method::GET]),
+        )
+        .layer(TraceLayer::new_for_http())
 }
 
 #[derive(OpenApi)]

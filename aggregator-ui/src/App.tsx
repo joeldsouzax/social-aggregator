@@ -2,13 +2,15 @@ import { usePostQuery } from '@/services/aggregator';
 
 export const App = () => {
   const { data: posts, isLoading, error } = usePostQuery();
-  if (isLoading) {
-    return <div>Connecting to the post stream...</div>;
-  }
+  // if (isLoading) {
+  //   return <div>Connecting to the post stream...</div>;
+  // }
   if (error) {
     const errorMessage = 'error' in error ? error.error : JSON.stringify(error);
     return <div>Error connecting to stream: {errorMessage}</div>;
   }
+
+    console.log(posts);
 
   return (
     <div>

@@ -5,26 +5,35 @@ const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const aggregatorApi = api.injectEndpoints({
   endpoints: (build) => ({
-    post: build.query<PostApiResponse, PostApiArg>({
-      query: () => ({ url: `/post` }),
-     async onCacheEntryAdded(_,  { updateCachedData,  cacheEntryRemoved }) {
+    post: build.query<string[], string>({
+     queryFn: () => ({ data: [] }),
+     keepUnusedDataFor: 0,
+      async onCacheEntryAdded(
+        _,
+        { updateCachedData, cacheEntryRemoved }
+      ) {
         const eventSource = new EventSource(`${API_BASE_URL}/post`);
 
         eventSource.onmessage = (event) => {
-          const parsedData: string = JSON.parse(event.data);
-          updateCachedData((draft) => {
-            draft.push(parsedData);
-          });
+          try {
+            const parsedEvent: string = event.data;
+            updateCachedData((draft) => {
+                draft.push(parsedEvent);
+            });
+          } catch (e) {
+            console.error('Failed to parse SSE event:', e);
+          }
         };
-        
+        eventSource.onerror = (err) => {
+          console.error('EventSource failed:', err);
+          eventSource.close();
+        };
         await cacheEntryRemoved;
         eventSource.close();
-     }
+      },
     }),
   }),
   overrideExisting: true,
 });
-export type PostApiResponse = string[];
-export type PostApiArg = void;
 export const { useHealthCheckQuery } = generatedApi; // Re-export the hooks you want to keep
 export const { usePostQuery } = aggregatorApi; 
