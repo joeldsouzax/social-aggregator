@@ -29,21 +29,18 @@ pub async fn route() -> Result<(StatusCode, ValidJson<HealthResponse>), Error> {
 
 #[cfg(test)]
 mod test {
-    // use super::route;
-    // use crate::api::test::get_response_body;
-    // use axum::http::StatusCode;
-    // use axum::response::IntoResponse;
-    // use serde_json::json;
+    use super::route;
+    use crate::test::get_response_body;
+    use axum::http::StatusCode;
+    use axum::response::IntoResponse;
+    use serde_json::json;
 
-    // #[tokio::test]
-    // async fn health_gives_ok() {
-    //     let response = route().await;
-    //     let response = response.into_response();
-    //     assert_eq!(response.status(), StatusCode::OK);
-    //     let body = get_response_body(response).await;
-    //     assert_eq!(
-    //         body,
-    //         json!({"data": {"message": "ok."}, "status": "success"})
-    //     );
-    // }
+    #[tokio::test]
+    async fn health_gives_ok() {
+        let response = route().await;
+        let response = response.into_response();
+        assert_eq!(response.status(), StatusCode::OK);
+        let body = get_response_body(response).await;
+        assert_eq!(body, json!({"message": "ok."}));
+    }
 }

@@ -11,7 +11,7 @@ pub struct HealthResponse {
 
 #[utoipa::path(get,
                path = "/post",
-               tags = ["external"],
+               tags = ["External"],
                operation_id = "post",
                responses(
                    (status = OK, body = HealthResponse, description = "Streaming posts", content_type = "application/json")

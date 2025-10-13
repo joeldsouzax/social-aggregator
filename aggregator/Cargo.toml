@@ -25,3 +25,7 @@ utoipa-swagger-ui.workspace = true
 utoipa-swagger-ui-vendored.workspace = true
 validator = { version = "0.20.0", features = ["derive"] }
 workspace-hack.workspace = true
+
+[dev-dependencies]
+http-body-util = "0.1.3"
+tower = { version = "0.5.2", features = ["util"] }
