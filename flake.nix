@@ -94,9 +94,45 @@
 
         ## crates
         ## personal scripts
+
         pu = pkgs.writeShellScriptBin "start-infra" ''
+          #!/usr/bin/env bash
           set -euo pipefail
-          podman compose up -d
+          echo "--- Setting up data directories ---"
+          mkdir -p .data
+          sudo chown -P 1000:1000 .data
+
+          # Apicurio
+          mkdir -p .data/apicurio_db
+          sudo chown -P 999:999 .data/apicurio_db
+
+          # Kafka
+          mkdir -p .data/controller-1 .data/controller-2 .data/controller-3
+          sudo chown -R 1000:1000 .data/controller-1 .data/controller-2 .data/controller-3
+
+          mkdir -p .data/broker-1 .data/broker-2 .data/broker-3 .data/broker-4
+          sudo chown -R 1000:1000 .data/broker-1 .data/broker-2 .data/broker-3 .data/broker-4
+          echo "Directory setup complete."
+          echo ""
+
+          SECRETS_FILE=".env"
+          echo "Attempting to source secrets from $SECRETS_FILE..."
+          if [ -f "$SECRETS_FILE" ]; then
+            set -a
+            source "$SECRETS_FILE"
+            set +a
+            echo "Secrets sourced successfully."
+          else
+            echo "Warning: Secrets file not found."
+            echo "Attempting to decrypt now as a fallback..."
+            # Also add the --output-type flag here
+            sops --decrypt --output-type dotenv infra/secrets/dev.yaml > "$SECRETS_FILE"
+            set -a
+            source "$SECRETS_FILE"
+            set +a
+          fi
+
+          sudo -E podman compose up -d
         '';
 
         pd = pkgs.writeShellScriptBin "stop-infra" ''
@@ -230,6 +266,16 @@
           shellHook = ''
             #!/usr/bin/env bash
             # Create a fancy welcome message
+            #
+            echo "Decrypting secrets to .sops-dev-secrets.env..."
+            if sops --decrypt --output-type dotenv infra/secrets/dev.yaml > .env; then
+              echo "Sourcing secrets for dev shell..."
+              set -a
+              source .env
+              set +a
+            else
+              echo "Warning: Failed to decrypt secrets. Continuing without them."
+            fi
             REPO_NAME=$(basename "$PWD")
             PROPER_REPO_NAME=$(echo "$REPO_NAME" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
             figlet -f doom "$PROPER_REPO_NAME" | lolcat -a -d 2
