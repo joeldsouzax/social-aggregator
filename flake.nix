@@ -59,6 +59,7 @@
             ./Cargo.lock
             (craneLib.fileset.commonCargoSources ./feeders)
             (craneLib.fileset.commonCargoSources ./aggregator)
+            (craneLib.fileset.commonCargoSources ./commons/proto-definitions)
             (craneLib.fileset.commonCargoSources ./commons/workspace-hack)
 
           ];

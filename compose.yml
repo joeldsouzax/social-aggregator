@@ -41,7 +41,7 @@ services:
       KAFKA_CLUSTERS_0_METRICS_TYPE: JMX
       DYNAMIC_CONFIG_ENABLED: true
     ports:
-      - 127.0.0.1:${KAFKA_UI_PORT}:8080/tcp
+      - ${KAFKA_UI_PORT}:8080/tcp
     depends_on:
       broker-1:
         condition: service_healthy

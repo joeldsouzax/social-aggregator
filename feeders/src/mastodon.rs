@@ -40,21 +40,10 @@ impl Mastodon {
                             Message::Update(mes) => {
                                 println!("{:#?}", mes);
                             }
-                            Message::Notification(mes) => {
-                                println!("{:#?}", mes);
-                            }
-                            Message::Conversation(mes) => {
-                                println!("{:#?}", mes);
-                            }
-                            Message::Delete(mes) => {
-                                println!("message is deleted: {}", mes);
-                            }
                             Message::StatusUpdate(mes) => {
                                 println!("updated: {:#?}", mes)
                             }
-                            Message::Heartbeat() => {
-                                println!("heartbeat");
-                            }
+                            _ => {}
                         }
                     }
                 })
