@@ -10,7 +10,7 @@ futures-util = "0.3.31"
 megalodon = "1.0.3"
 prost = "0.14.1"
 prost-build = "0.14.1"
-schema_registry_converter = { version = "4.6.0", features = ["rustls_tls", "proto_raw", "easy"] }
+schema_registry_converter = { version = "4.6.0", features = ["proto_raw", "easy"] }
 prost-types = "0.14.1"
 proto-definitions = { version = "0.1.0", path = "commons/proto-definitions" }
 rdkafka = { version = "0.38.0", features = ["cmake-build"] }

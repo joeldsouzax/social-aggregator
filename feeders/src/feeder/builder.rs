@@ -58,7 +58,7 @@ where
 
 impl SocialEngineBuilder<Start> {
     #[instrument(level = "debug")]
-    pub fn with_encoder_registry<'a>(self, url: Url) -> SocialEngineBuilder<SocialEncoder<'a>> {
+    pub fn encoder<'a>(url: Url) -> SocialEngineBuilder<SocialEncoder<'a>> {
         debug!("setting schema registry at: {}", url);
         let sr_settings = SrSettings::new(url.to_string());
         let encoder = ProtoRawEncoder::new(sr_settings);

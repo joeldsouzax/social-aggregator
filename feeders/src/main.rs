@@ -1,5 +1,8 @@
 use anyhow::Result;
-use feeders::socials::mastodon::Mastodon;
+use feeders::{
+    feeder::builder::{SocialEngine, Start},
+    socials::mastodon::Mastodon,
+};
 use std::env;
 use tracing_subscriber::{
     EnvFilter, Layer,
@@ -21,6 +24,6 @@ async fn main() -> Result<()> {
     let url = Url::parse(&url)?;
     let token = env::var("MASTODON_ACCESS_TOKEN")?;
     let mastodon = Mastodon::new(url, token)?;
-
+    let schema_url = env::var("SCHEME_REGISTRY")?;
     Ok(())
 }
