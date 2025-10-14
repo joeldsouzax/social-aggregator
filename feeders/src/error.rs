@@ -1,3 +1,4 @@
+use rdkafka::error::KafkaError;
 use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
@@ -7,4 +8,7 @@ pub enum Error {
 
     #[error("Failed to initialize `{service}` client")]
     FailedToInitialize { service: String, reason: String },
+
+    #[error(transparent)]
+    Producer(#[from] KafkaError),
 }
