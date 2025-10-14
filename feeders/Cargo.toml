@@ -22,7 +22,9 @@ tracing-subscriber.workspace = true
 url.workspace = true
 workspace-hack.workspace = true
 prost-types.workspace = true
-chrono = "0.4.42"
+chrono.workspace = true
+prost.workspace = true
+url.workspace = true
 
 [dev-dependencies]
 testcontainers = "0.25.0"

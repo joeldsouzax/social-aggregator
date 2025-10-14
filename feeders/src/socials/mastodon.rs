@@ -1,5 +1,7 @@
-use crate::FeederQueue;
-use crate::{SocialFeeder, error::Error};
+use crate::{
+    error::Error,
+    feeder::{SocialFeeder, queue::FeederQueue},
+};
 use megalodon::{Megalodon, mastodon::Mastodon as MastodonClient, streaming::Message};
 use prost_types::Timestamp;
 use proto_definitions::social::v1::{Post, Service};

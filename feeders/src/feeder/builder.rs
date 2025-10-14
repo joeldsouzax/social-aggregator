@@ -1,3 +1,4 @@
+use super::queue::FeederQueue;
 use rdkafka::{
     config::ClientConfig,
     producer::{FutureProducer, FutureRecord},
@@ -7,54 +8,107 @@ use schema_registry_converter::async_impl::schema_registry::SrSettings;
 use std::fmt::Debug;
 use tokio::sync::mpsc::{Receiver, Sender, channel};
 use tracing::{debug, instrument};
+use url::Url;
 
-pub struct FeederBuilder<T>
-where
-    T: Debug,
-{
-    producer: Option<FutureProducer>,
-    recv: Option<Receiver<T>>,
-    sender: Option<FeederQueue<T>>,
+pub(crate) trait SocialEngine {}
+
+pub(crate) struct SocialEncoder<'a> {
+    encoder: ProtoRawEncoder<'a>,
 }
 
-impl<T> FeederBuilder<T>
+impl<'a> SocialEngine for SocialEncoder<'a> {}
+
+pub(crate) struct SocialProducer<'a> {
+    producer: FutureProducer,
+    encoder: ProtoRawEncoder<'a>,
+}
+
+impl<'a> SocialEngine for SocialProducer<'a> {}
+
+pub struct Start;
+
+impl SocialEngine for Start {}
+
+pub struct SocialEngineBuilder<E>
 where
-    T: Debug + Clone,
+    E: SocialEngine,
 {
-    pub fn new() -> Self {
-        Self {
-            producer: None,
-            recv: None,
-            sender: None,
+    inner: E,
+}
+
+impl SocialEngineBuilder<Start> {
+    #[instrument(level = "debug")]
+    pub fn with_encoder_registry<'a>(self, url: Url) -> SocialEngineBuilder<SocialEncoder<'a>> {
+        debug!("setting schema registry at: {}", url);
+        let sr_settings = SrSettings::new(url.to_string());
+        let encoder = ProtoRawEncoder::new(sr_settings);
+        SocialEngineBuilder {
+            inner: SocialEncoder { encoder },
         }
     }
+}
 
+impl<'a> SocialEngineBuilder<SocialEncoder<'a>> {
     #[instrument(level = "debug", skip(brokers, self) err)]
-    pub fn with_brokers<S: AsRef<str>>(self, brokers: S) -> Result<Self, error::Error> {
+    pub fn with_producer<S: AsRef<str>>(
+        self,
+        brokers: S,
+    ) -> Result<SocialEngineBuilder<SocialProducer<'a>>, Error> {
         debug!("creating a producer targeted at: {}", brokers.as_ref());
         let producer: FutureProducer = ClientConfig::new()
             .set("bootstrap.servers", brokers.as_ref())
             .set("message.timeout.ms", "5000")
             .create()?;
-        Ok(Self {
-            producer: Some(producer),
-            recv: None,
-            sender: None,
+
+        let encoder = self.inner.encoder;
+        Ok(SocialEngineBuilder {
+            inner: SocialProducer { encoder, producer },
         })
     }
+}
 
-    pub fn with_buffer(self, buffer: usize) -> Self {
-        let (tx, rx) = channel::<T>(buffer);
-        let producer = self.producer;
-        Self {
-            producer,
-            sender: Some(FeederQueue::create(tx)),
-            recv: Some(rx),
-        }
+pub struct MultiSocialProducer<'a, T>
+where
+    T: Debug,
+{
+    producer: FutureProducer,
+    encoder: ProtoRawEncoder<'a>,
+    recv: Receiver<T>,
+}
+
+impl<'a> SocialEngineBuilder<SocialProducer<'a>> {
+    pub fn build(self) -> SocialProducer<'a> {
+        self.inner
     }
 
-    // TODO: returns a feederqueue and Feeder
-    pub fn build(self) -> Result<(), error::Error> {
-        unimplemented!()
+    pub fn build_multi<T>(self, buffer: usize) -> (MultiSocialProducer<'a, T>, FeederQueue<T>)
+    where
+        T: Debug,
+    {
+        let SocialProducer { producer, encoder } = self.inner;
+        let (tx, rx) = channel::<T>(buffer);
+        (
+            MultiSocialProducer {
+                producer,
+                encoder,
+                recv: rx,
+            },
+            FeederQueue::new(tx),
+        )
+    }
+}
+
+impl<'a, T> MultiSocialProducer<'a, T>
+where
+    T: Debug,
+{
+    pub async fn run(self, topic: &str) -> Result<(), Error> {
+        let MultiSocialProducer {
+            producer,
+            encoder,
+            recv,
+        } = self;
+
+        while let Some(message) = recv.recv().await {}
     }
 }
