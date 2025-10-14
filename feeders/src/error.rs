@@ -11,4 +11,7 @@ pub enum Error {
 
     #[error(transparent)]
     Producer(#[from] KafkaError),
+
+    #[error("Could not send error to kafka: `{0}`")]
+    FeederSend(String),
 }
