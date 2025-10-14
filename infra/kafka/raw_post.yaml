@@ -1,0 +1,20 @@
+apiVersion: "kafka.jikkou.io/v1beta2"
+kind: KafkaTopic
+metadata:
+  name: 'raw-posts'
+spec:
+  partition: 3
+  replicationFactor: 3
+  configs:
+    retention.ms: 604800000 
+    cleanup.policy: 'delete'
+---
+apiVersion: "schemaregistry.jikkou.io/v1beta2"
+kind: "SchemaRegistrySubject"
+metadata:
+  name: "raw-posts-value"
+spec:
+  schemaType: "PROTOBUF"
+  compatibilityLevel: "BACKWARD"
+  schema:
+    $ref: ./raw_post.proto

@@ -1433,6 +1433,7 @@ version = "0.1.0"
 dependencies = [
  "prost",
  "prost-build",
+ "prost-types",
  "workspace-hack",
 ]
 
@@ -3216,6 +3217,7 @@ dependencies = [
  "memchr",
  "percent-encoding",
  "prost",
+ "prost-types",
  "regex",
  "regex-automata",
  "regex-syntax",

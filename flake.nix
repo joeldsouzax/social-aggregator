@@ -27,13 +27,16 @@
         craneLib = (crane.mkLib pkgs).overrideToolchain
           (fenix.packages.${system}.complete.toolchain);
 
+        protoFiles =
+          lib.fileset.fileFilter (file: file.hasExt "proto") unfilteredSrc;
+
         unfilteredSrc = ./.;
 
         src = lib.fileset.toSource {
           root = unfilteredSrc;
           fileset = lib.fileset.unions [
             (craneLib.fileset.commonCargoSources unfilteredSrc)
-            ./proto_files
+            protoFiles
           ];
         };
 
@@ -61,18 +64,18 @@
           doCheck = false;
         };
 
-        # workspaceSrc = lib.fileset.toSource {
-        #   root = ./.;
-        #   fileset = lib.fileset.unions [
-        #     ./Cargo.toml
-        #     ./Cargo.lock
-        #     (craneLib.fileset.commonCargoSources ./feeders)
-        #     (craneLib.fileset.commonCargoSources ./aggregator)
-        #     (craneLib.fileset.commonCargoSources ./commons/proto-definitions)
-        #     (craneLib.fileset.commonCargoSources ./commons/workspace-hack)
-
-        #   ];
-        # };
+        workspaceSrc = lib.fileset.toSource {
+          root = ./.;
+          fileset = lib.fileset.unions [
+            ./Cargo.toml
+            ./Cargo.lock
+            (craneLib.fileset.commonCargoSources ./feeders)
+            (craneLib.fileset.commonCargoSources ./aggregator)
+            (craneLib.fileset.commonCargoSources ./commons/proto-definitions)
+            (craneLib.fileset.commonCargoSources ./commons/workspace-hack)
+            protoFiles
+          ];
+        };
 
         mkPackage = name:
           let
@@ -83,7 +86,8 @@
             pname = cargoToml.package.name;
             version = cargoToml.package.version;
             bin = craneLib.buildPackage (individualCrateArgs // {
-              inherit pname version src;
+              inherit pname version;
+              src = workspaceSrc;
               cargoExtraArgs = "-p ${pname}";
             });
 

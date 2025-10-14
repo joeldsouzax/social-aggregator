@@ -1,3 +1,7 @@
-pub mod post {
-    include!(concat!(env!("OUT_DIR"), "/post.rs"));
+pub mod social {
+    pub mod v1 {
+        include!(concat!(env!("OUT_DIR"), "/social.v1.rs"));
+    }
 }
+
+pub use social::v1;
