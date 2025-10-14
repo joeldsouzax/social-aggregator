@@ -1,7 +1,12 @@
 use feeders::Feeder;
-use rdkafka::{config::ClientConfig, consumer::StreamConsumer, producer::FutureRecord};
+use futures_util::stream::StreamExt;
+use rdkafka::{
+    ClientConfig, Message,
+    consumer::{Consumer, StreamConsumer},
+    producer::FutureRecord,
+};
 use std::time::Duration;
-use testcontainers::{ImageExt, core::WaitFor, runners::AsyncRunner};
+use testcontainers::runners::AsyncRunner;
 use testcontainers_modules::kafka::confluent::{self, Kafka};
 
 #[tokio::test]
@@ -17,7 +22,7 @@ async fn feeder_producer_should_work() -> Result<(), Box<dyn std::error::Error +
             .get_host_port_ipv4(confluent::KAFKA_PORT)
             .await?
     );
-    let feeder = Feeder::create(brokers).expect("should create feeder");
+    let feeder = Feeder::create(&brokers).expect("should create feeder");
 
     let consumer = ClientConfig::new()
         .set("group.id", "testcontainer-rs")
@@ -47,5 +52,27 @@ async fn feeder_producer_should_work() -> Result<(), Box<dyn std::error::Error +
             .await
             .unwrap();
     }
+
+    consumer
+        .subscribe(&[topic])
+        .expect("Failed to subscribe to a topic");
+
+    let mut message_stream = consumer.stream();
+    for produced in expected {
+        let borrowed_message = tokio::time::timeout(Duration::from_secs(10), message_stream.next())
+            .await
+            .unwrap()
+            .unwrap();
+
+        assert_eq!(
+            produced,
+            borrowed_message
+                .unwrap()
+                .payload_view::<str>()
+                .unwrap()
+                .unwrap()
+        );
+    }
+
     Ok(())
 }

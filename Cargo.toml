@@ -5,18 +5,18 @@ members = ["aggregator", "commons/proto-definitions", "commons/workspace-hack", 
 [workspace.dependencies]
 anyhow = "1.0.100"
 axum = { version = "0.8.6", features = ["ws", "macros", "json"] }
+futures-util = "0.3.31"
 megalodon = "1.0.3"
 prost = "0.14.1"
 prost-build = "0.14.1"
 prost-types = "0.14.1"
-futures-util = "0.3.31"
-tokio-stream = "0.1.17"
 proto-definitions = { version = "0.1.0", path = "commons/proto-definitions" }
 rdkafka = { version = "0.38.0", features = ["cmake-build"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 thiserror = "2.0.17"
 tokio = { version = "1.47.1", features = ["full"] }
+tokio-stream = "0.1.17"
 tower-http = { version = "0.6.6", features = ["trace", "cors"] }
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
