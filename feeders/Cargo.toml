@@ -14,7 +14,7 @@ anyhow.workspace = true
 megalodon.workspace = true
 proto-definitions.workspace = true
 rdkafka.workspace = true
-schema_registry_converter = { version = "4.6.0", features = ["rustls_tls"] }
+schema_registry_converter.workspace = true
 thiserror.workspace = true
 tokio.workspace = true
 tracing.workspace = true
