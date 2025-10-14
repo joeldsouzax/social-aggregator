@@ -1,8 +1,8 @@
-import { usePostQuery } from '@/services/aggregator';
+import {  useSseQuery } from '@/services/aggregator';
 import { Container, CssBaseline, Paper, Typography, List,  ListItemButton,  ListItemText,  } from '@mui/material';
 
 export const App = () => {    
-  const { data: posts, isLoading, error, isFetching } = usePostQuery('posts', { skip: false,  keepUnusedDataFor: 0 });
+  const { data: posts, isLoading, error, isFetching } = useSseQuery('posts', { skip: false,  keepUnusedDataFor: 0 });
     
   if (isLoading) {
     return <div>Connecting to the post stream...</div>;

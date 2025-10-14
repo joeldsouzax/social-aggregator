@@ -95,6 +95,33 @@
 
         ## crates
         ## personal scripts
+        ##
+        ##
+        jikkou = pkgs.stdenv.mkDerivation rec {
+          pname = "jikkou";
+          version = "0.35.0";
+
+          src = pkgs.fetchurl {
+            url =
+              "https://github.com/streamthoughts/jikkou/releases/download/v${version}/jikkou-${version}-linux-x86_64.zip";
+            sha256 = "sha256-AG9chw1Ld6TkkccNx/sjAxlWbtOElgiU+FG2l+rk9ho=";
+          };
+
+          nativeBuildInputs = [ pkgs.unzip ];
+
+          installPhase = ''
+            install -Dm755 bin/jikkou $out/bin/jikkou
+          '';
+
+          meta = with pkgs.lib; {
+            description =
+              "A command-line tool to manage, automate, and provision your Apache Kafka resources";
+            homepage = "https://github.com/streamthoughts/jikkou";
+            license = licenses.asl20; # Apache License 2.0
+            platforms = [ "x86_64-linux" ];
+            mainProgram = "jikkou";
+          };
+        };
 
         pu = pkgs.writeShellScriptBin "start-infra" ''
           #!/usr/bin/env bash
@@ -250,7 +277,7 @@
         };
 
         packages = {
-          inherit feeders aggregator pu pd i;
+          inherit feeders aggregator pu pd i jikkou;
           ## integration test for auth
           integration = pkgs.testers.runNixOSTest ({
             name = "integration-test";
@@ -306,6 +333,7 @@
             nodePackages.pnpm
             nodePackages.typescript
             nodePackages.typescript-language-server
+            jikkou
           ];
         };
       });

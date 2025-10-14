@@ -5,18 +5,19 @@ const API_BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const aggregatorApi = api.injectEndpoints({
   endpoints: (build) => ({
-    post: build.query<string[], string>({
-     queryFn: () => ({ data: [] }),
+    sse: build.query<string[], string>({
+     queryFn: (topic) => ({ data: [] }),
      keepUnusedDataFor: 0,
       async onCacheEntryAdded(
-        _,
+        topic,
         { updateCachedData, cacheEntryRemoved }
       ) {
-        const eventSource = new EventSource(`${API_BASE_URL}/post`);
+        const eventSource = new EventSource(`${API_BASE_URL}/sse`);
 
         eventSource.onmessage = (event) => {
           try {
             const parsedEvent: string = event.data;
+            // todo: check topic and update the data.
             updateCachedData((draft) => {
                 draft.push(parsedEvent);
             });
@@ -36,4 +37,4 @@ const aggregatorApi = api.injectEndpoints({
   overrideExisting: true,
 });
 export const { useHealthCheckQuery } = generatedApi; // Re-export the hooks you want to keep
-export const { usePostQuery } = aggregatorApi; 
+export const { useSseQuery } = aggregatorApi; 

@@ -4,8 +4,8 @@ const injectedRtkApi = api.injectEndpoints({
     healthCheck: build.query<HealthCheckApiResponse, HealthCheckApiArg>({
       query: () => ({ url: `/health` }),
     }),
-    post: build.query<PostApiResponse, PostApiArg>({
-      query: () => ({ url: `/post` }),
+    sse: build.query<SseApiResponse, SseApiArg>({
+      query: () => ({ url: `/sse` }),
     }),
   }),
   overrideExisting: false,
@@ -14,9 +14,9 @@ export { injectedRtkApi as aggregator };
 export type HealthCheckApiResponse =
   /** status 200 Application is Healthy */ HealthResponse;
 export type HealthCheckApiArg = void;
-export type PostApiResponse = unknown;
-export type PostApiArg = void;
+export type SseApiResponse = unknown;
+export type SseApiArg = void;
 export type HealthResponse = {
   message: string;
 };
-export const { useHealthCheckQuery, usePostQuery } = injectedRtkApi;
+export const { useHealthCheckQuery, useSseQuery } = injectedRtkApi;
