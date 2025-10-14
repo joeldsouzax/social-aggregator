@@ -8,6 +8,7 @@ repository.workspace = true
 categories.workspace = true
 description.workspace = true
 homepage.workspace = true
+include = ["/src", "build.rs", "/proto"]
 
 [dependencies]
 prost.workspace = true
