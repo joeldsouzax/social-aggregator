@@ -17,4 +17,4 @@ spec:
   schemaType: "PROTOBUF"
   compatibilityLevel: "BACKWARD"
   schema:
-    $ref: ./raw_post.proto
+    $ref: ./commons/proto-definitions/src/post.proto
