@@ -1,6 +1,9 @@
-use crate::error::Error;
+use crate::FeederQueue;
+use crate::{SocialFeeder, error::Error};
 use megalodon::{Megalodon, mastodon::Mastodon as MastodonClient, streaming::Message};
-use tracing::{info, instrument, warn};
+use prost_types::Timestamp;
+use proto_definitions::social::v1::{Post, Service};
+use tracing::{debug, info, instrument, warn};
 use url::Url;
 
 #[derive(Debug, Clone)]
@@ -28,20 +31,32 @@ impl Mastodon {
         info!("Megalodon client initialized successfully.");
         Ok(Mastodon { client })
     }
+}
 
-    #[instrument]
-    pub async fn stream(self) {
+impl SocialFeeder for Mastodon {
+    type Message = Post;
+
+    #[instrument(level = "debug")]
+    async fn stream(self, queue: FeederQueue<Self::Message>) {
         let streaming = self.client.public_streaming().await;
         streaming
             .listen(Box::new(|message| {
                 Box::pin({
+                    let queue = queue.clone();
                     async move {
                         match message {
-                            Message::Update(mes) => {
-                                println!("{:#?}", mes);
-                            }
-                            Message::StatusUpdate(mes) => {
-                                println!("updated: {:#?}", mes)
+                            Message::Update(status) | Message::StatusUpdate(status) => {
+                                debug!("receieved status form mastodon: {}", status.id);
+                                let post = Post {
+                                    id: status.id,
+                                    service: Service::Mastodon as i32,
+                                    timestamp: Some(Timestamp {
+                                        seconds: status.created_at.timestamp(),
+                                        nanos: status.created_at.timestamp_subsec_nanos() as i32,
+                                    }),
+                                    content: status.content,
+                                };
+                                let _ = queue.send(post).await;
                             }
                             _ => {}
                         }
@@ -51,5 +66,3 @@ impl Mastodon {
             .await;
     }
 }
-
-// TODO: create kafka topics

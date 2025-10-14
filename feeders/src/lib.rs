@@ -54,6 +54,7 @@ where
     pub async fn run(self, topic: &str) -> Result<(), error::Error> {
         let Feeder { producer, mut recv } = self;
         while let Some(message) = recv.recv().await {
+            // TODO: add schema registry
             producer
                 .send(
                     FutureRecord::to(topic)
@@ -118,9 +119,6 @@ where
 }
 
 pub trait SocialFeeder {
-    type Message;
-    fn stream(
-        self,
-        queue: FeederQueue<Self::Message>,
-    ) -> impl Future<Output = Result<(), error::Error>>;
+    type Message: Debug;
+    fn stream(self, queue: FeederQueue<Self::Message>) -> impl Future<Output = ()>;
 }

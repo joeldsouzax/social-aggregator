@@ -648,8 +648,10 @@ name = "feeders"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chrono",
  "futures-util",
  "megalodon",
+ "prost-types 0.14.1",
  "proto-definitions",
  "rdkafka",
  "schema_registry_converter",
@@ -2596,6 +2598,7 @@ dependencies = [
  "reqwest 0.12.23",
  "serde",
  "serde_json",
+ "tokio",
 ]
 
 [[package]]
