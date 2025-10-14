@@ -6,14 +6,14 @@ use tokio_stream::StreamExt as _;
 use tracing::instrument;
 
 #[utoipa::path(get,
-               path = "/post",
+               path = "/sse",
                tags = ["External"],
-               operation_id = "post",
+               operation_id = "sse",
                responses(
                    (status = OK, body = String,  description = "A stream of Server-Sent Events (SSE).", content_type = "text/event-stream")
                )
 )]
-#[instrument(name = "post", target = "api::post")]
+#[instrument(name = "sse", target = "api::sse")]
 pub async fn route() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     let stream = stream::repeat_with(|| Event::default().data("some post information"))
         .map(Ok)
@@ -21,6 +21,10 @@ pub async fn route() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
 
     Sse::new(stream).keep_alive(KeepAlive::default())
 }
+
+// two events,
+// 1 - test events
+// 2 - post events
 
 #[cfg(test)]
 mod test {
@@ -41,4 +45,8 @@ mod test {
     //         json!({"data": {"message": "ok."}, "status": "success"})
     //     );
     // }
+    //
+    //
 }
+
+// TODO: connect kafka here and get posts from kafka,

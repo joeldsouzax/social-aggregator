@@ -14,7 +14,7 @@ pub fn router() -> OpenApiRouter {
     let cors_origin = "http://localhost:5173".parse::<HeaderValue>().unwrap();
 
     OpenApiRouter::new()
-        .route("/post", get(routes::post))
+        .route("/sse", get(routes::sse))
         .route("/health", get(routes::health))
         .fallback(routes::not_found)
         .layer(
@@ -28,7 +28,7 @@ pub fn router() -> OpenApiRouter {
 #[derive(OpenApi)]
 #[openapi(
     info(title = "Aggregator", description = "Social Aggregator",),
-    paths(routes::health::route, routes::post::route,)
+    paths(routes::health::route, routes::sse::route,)
 )]
 pub struct ApiDoc;
 
