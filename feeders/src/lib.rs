@@ -118,7 +118,9 @@ where
 }
 
 pub trait SocialFeeder {
-    fn stream<T>(self, queue: FeederQueue<T>) -> impl Future<Output = Result<(), error::Error>>
-    where
-        T: Debug + Clone;
+    type Message;
+    fn stream(
+        self,
+        queue: FeederQueue<Self::Message>,
+    ) -> impl Future<Output = Result<(), error::Error>>;
 }
