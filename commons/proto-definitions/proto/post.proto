@@ -2,14 +2,16 @@ syntax = "proto3";
 
 package social.v1;
 
+import "google/protobuf/timestamp.proto";
+
 message Post {
   string id = 1;
   Service service = 2;
-  string timestamp = 3;
+  google.protobuf.Timestamp timestamp = 3;
   string content = 4;
 }
 
 enum Service {
-  Mastodon = 0;
+  MASTODON = 0;
   X = 1;
 }
