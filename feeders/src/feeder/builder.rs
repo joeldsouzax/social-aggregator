@@ -1,34 +1,54 @@
-use super::queue::FeederQueue;
+use super::{PostId, queue::FeederQueue};
+use crate::error::Error;
+use prost::Message;
 use rdkafka::{
     config::ClientConfig,
     producer::{FutureProducer, FutureRecord},
 };
 use schema_registry_converter::async_impl::proto_raw::ProtoRawEncoder;
 use schema_registry_converter::async_impl::schema_registry::SrSettings;
-use std::fmt::Debug;
-use tokio::sync::mpsc::{Receiver, Sender, channel};
+use schema_registry_converter::schema_registry_common::SubjectNameStrategy;
+use std::{
+    fmt::{self, Debug},
+    time::Duration,
+};
+use tokio::sync::mpsc::{Receiver, channel};
 use tracing::{debug, instrument};
 use url::Url;
 
-pub(crate) trait SocialEngine {}
+pub trait SocialEngine {}
 
-pub(crate) struct SocialEncoder<'a> {
+#[derive(Debug)]
+pub struct SocialEncoder<'a> {
     encoder: ProtoRawEncoder<'a>,
 }
 
 impl<'a> SocialEngine for SocialEncoder<'a> {}
 
-pub(crate) struct SocialProducer<'a> {
+pub struct SocialProducer<'a> {
     producer: FutureProducer,
     encoder: ProtoRawEncoder<'a>,
 }
 
+impl<'a> Debug for SocialProducer<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("SocialProducer")
+            // We use a placeholder because FutureProducer doesn't implement Debug.
+            .field("producer", &"<FutureProducer>")
+            // This assumes ProtoRawEncoder implements Debug.
+            .field("encoder", &self.encoder)
+            .finish()
+    }
+}
+
 impl<'a> SocialEngine for SocialProducer<'a> {}
 
+#[derive(Debug)]
 pub struct Start;
 
 impl SocialEngine for Start {}
 
+#[derive(Debug)]
 pub struct SocialEngineBuilder<E>
 where
     E: SocialEngine,
@@ -69,7 +89,7 @@ impl<'a> SocialEngineBuilder<SocialEncoder<'a>> {
 
 pub struct MultiSocialProducer<'a, T>
 where
-    T: Debug,
+    T: Debug + Message + PostId,
 {
     producer: FutureProducer,
     encoder: ProtoRawEncoder<'a>,
@@ -83,7 +103,7 @@ impl<'a> SocialEngineBuilder<SocialProducer<'a>> {
 
     pub fn build_multi<T>(self, buffer: usize) -> (MultiSocialProducer<'a, T>, FeederQueue<T>)
     where
-        T: Debug,
+        T: Debug + Message + PostId,
     {
         let SocialProducer { producer, encoder } = self.inner;
         let (tx, rx) = channel::<T>(buffer);
@@ -93,22 +113,36 @@ impl<'a> SocialEngineBuilder<SocialProducer<'a>> {
                 encoder,
                 recv: rx,
             },
-            FeederQueue::new(tx),
+            FeederQueue::create(tx),
         )
     }
 }
 
 impl<'a, T> MultiSocialProducer<'a, T>
 where
-    T: Debug,
+    T: Debug + Message + PostId,
 {
     pub async fn run(self, topic: &str) -> Result<(), Error> {
         let MultiSocialProducer {
             producer,
             encoder,
-            recv,
+            mut recv,
         } = self;
-
-        while let Some(message) = recv.recv().await {}
+        while let Some(post) = recv.recv().await {
+            let mut proto_bytes = Vec::new();
+            post.encode(&mut proto_bytes)?;
+            let subject_strategy = SubjectNameStrategy::TopicNameStrategy(topic.to_string(), false);
+            let payload = encoder
+                .encode(&proto_bytes, "social.v1.Post", subject_strategy)
+                .await?;
+            producer
+                .send(
+                    FutureRecord::to(topic).payload(&payload).key(&post.id()),
+                    Duration::from_secs(5),
+                )
+                .await
+                .map_err(|(err, _)| err)?;
+        }
+        Ok(())
     }
 }

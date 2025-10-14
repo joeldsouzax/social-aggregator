@@ -24,7 +24,6 @@ workspace-hack.workspace = true
 prost-types.workspace = true
 chrono.workspace = true
 prost.workspace = true
-url.workspace = true
 
 [dev-dependencies]
 testcontainers = "0.25.0"

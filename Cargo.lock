@@ -651,6 +651,7 @@ dependencies = [
  "chrono",
  "futures-util",
  "megalodon",
+ "prost 0.14.1",
  "prost-types 0.14.1",
  "proto-definitions",
  "rdkafka",

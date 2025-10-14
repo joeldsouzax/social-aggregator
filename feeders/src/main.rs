@@ -1,5 +1,5 @@
 use anyhow::Result;
-use feeders::mastodon;
+use feeders::socials::mastodon::Mastodon;
 use std::env;
 use tracing_subscriber::{
     EnvFilter, Layer,
@@ -20,7 +20,7 @@ async fn main() -> Result<()> {
     let url = env::var("MASTODON_URL")?;
     let url = Url::parse(&url)?;
     let token = env::var("MASTODON_ACCESS_TOKEN")?;
-    let mastodon = mastodon::Mastodon::new(url, token)?;
-    mastodon.stream().await;
+    let mastodon = Mastodon::new(url, token)?;
+
     Ok(())
 }
