@@ -13,5 +13,5 @@ homepage.workspace = true
 prost.workspace = true
 workspace-hack.workspace = true
 
-[dev-dependencies]
-prost-build = "0.14.1"
+[build-dependencies]
+prost-build.workspace = true

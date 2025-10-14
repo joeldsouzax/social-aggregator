@@ -39,7 +39,8 @@
               pkgs.libiconv
             ];
           nativeBuildInputs = with pkgs;
-            [ cmake pkg-config ] ++ lib.optionals pkgs.stdenv.isDarwin [
+            [ cmake pkg-config protobuf ]
+            ++ lib.optionals pkgs.stdenv.isDarwin [
               pkgs.darwin.apple_sdk.frameworks.Security
               pkgs.darwin.Libsystem
             ];
@@ -306,8 +307,8 @@
             fi
             REPO_NAME=$(basename "$PWD")
             PROPER_REPO_NAME=$(echo "$REPO_NAME" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
-            figlet -f doom "$PROPER_REPO_NAME" | lolcat -a -d 2
-            cowsay -f dragon-and-cow "Welcome to the $PROPER_REPO_NAME development environment on ${system}!" | lolcat
+            figlet -f thin "$PROPER_REPO_NAME" | lolcat -a -d 2
+            cowsay -f sus "Welcome to the $PROPER_REPO_NAME development environment on ${system}!" | lolcat
           '';
 
           packages = [
