@@ -307,6 +307,13 @@
             #!/usr/bin/env bash
             # Create a fancy welcome message
             #
+            if ! systemctl --user is-active --quiet podman.socket; then
+              systemctl --user start podman.socket
+            fi          
+            # Set DOCKER_HOST for testcontainers
+            export DOCKER_HOST="unix://$XDG_RUNTIME_DIR/podman/podman.sock"
+            # Optional: enable for better compatibility
+            export TESTCONTAINERS_RYUK_DISABLED=true
             echo "Decrypting secrets to .sops-dev-secrets.env..."
             if sops --decrypt --output-type dotenv infra/secrets/dev.yaml > .env; then
               echo "Sourcing secrets for dev shell..."

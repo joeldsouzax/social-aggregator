@@ -6,7 +6,7 @@ use tracing::{debug, instrument};
 
 #[derive(Clone)]
 pub struct Feeder {
-    producer: FutureProducer,
+    pub producer: FutureProducer,
 }
 
 impl Feeder {

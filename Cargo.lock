@@ -620,6 +620,7 @@ dependencies = [
  "proto-definitions",
  "rdkafka",
  "testcontainers",
+ "testcontainers-modules",
  "thiserror 2.0.17",
  "tokio",
  "tracing",
@@ -2798,6 +2799,15 @@ dependencies = [
  "tokio-util",
  "ulid",
  "url",
+]
+
+[[package]]
+name = "testcontainers-modules"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1966329d5bb3f89d33602d2db2da971fb839f9297dad16527abf4564e2ae0a6d"
+dependencies = [
+ "testcontainers",
 ]
 
 [[package]]
