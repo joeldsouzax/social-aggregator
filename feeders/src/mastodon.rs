@@ -51,3 +51,5 @@ impl Mastodon {
             .await;
     }
 }
+
+// TODO: create kafka topics

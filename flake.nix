@@ -99,12 +99,12 @@
         ##
         jikkou = pkgs.stdenv.mkDerivation rec {
           pname = "jikkou";
-          version = "0.35.0";
+          version = "0.36.4";
 
           src = pkgs.fetchurl {
             url =
               "https://github.com/streamthoughts/jikkou/releases/download/v${version}/jikkou-${version}-linux-x86_64.zip";
-            sha256 = "sha256-AG9chw1Ld6TkkccNx/sjAxlWbtOElgiU+FG2l+rk9ho=";
+            sha256 = "sha256-/UCDyiL5L5ygcuXZDMj95qqWZh49PmoWj0y6k8pHwCU=";
           };
 
           nativeBuildInputs = [ pkgs.unzip ];
