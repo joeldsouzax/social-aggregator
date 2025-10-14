@@ -12,7 +12,7 @@ spec:
 apiVersion: "schemaregistry.jikkou.io/v1beta2"
 kind: "SchemaRegistrySubject"
 metadata:
-  name: "raw-posts-value"
+  name: "social.v1.Post"
 spec:
   schemaType: "PROTOBUF"
   compatibilityLevel: "BACKWARD"

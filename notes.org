@@ -1,0 +1,11 @@
+
+
+
+#+begin_src bash test produce
+kafkactl produce raw-posts \
+  --value-proto-type "social.v1.Post" \
+  --proto-file ./commons/proto-definitions/src/post.proto \
+  --input-format json \
+  -v '{"id": "post-xyz-789", "service": "MASTODON", "timestamp": "2025-10-14T17:45:00Z", "content": "This is a new post from Mastodon!"}'
+message produced (partition=0   offset=1)
+#+end_src
