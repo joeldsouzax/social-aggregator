@@ -2,7 +2,7 @@ use anyhow::Result;
 use prost::Message;
 use proto_definitions::social::v1::{Post, PostBatch};
 use redis::{AsyncCommands, RedisResult, aio::MultiplexedConnection};
-use social_engine::engine::SocialEngineBuilder;
+use social_engine::{engine::SocialEngineBuilder, error::Error};
 use std::{env, time::Duration};
 use tokio::{sync::mpsc, time::interval};
 use tracing::{error, info, instrument};
@@ -39,28 +39,52 @@ async fn main() -> Result<()> {
     let redis_conn = redis_client.get_multiplexed_async_connection().await?;
 
     let (tx, mut rx) = mpsc::channel::<Post>(2049);
-    let mut redis_publisher = redis_conn.clone();
-    let aggregate_task = tokio::spawn(async move {
-        let mut batch = Vec::with_capacity(50);
-        let mut ticker = interval(Duration::from_secs(1));
-        loop {
-            tokio::select! {
-                _ = ticker.tick() => {
-                    if !batch.is_empty() {
-                        info!("timer ticked, publishing {} posts", batch.len());
-                        publish_batch(&mut redis_publisher, &redis_channel, &mut batch).await;
+
+    let aggregate_task = tokio::spawn({
+        let mut redis_publisher = redis_conn.clone();
+        let redis_channel = redis_channel.clone();
+        async move {
+            let mut batch = Vec::with_capacity(50);
+            let mut ticker = interval(Duration::from_secs(1));
+            loop {
+                tokio::select! {
+                    _ = ticker.tick() => {
+                        if !batch.is_empty() {
+                            info!("timer ticked, publishing {} posts", batch.len());
+                            publish_batch(&mut redis_publisher, &redis_channel, &mut batch).await;
+                        }
                     }
-                }
-                Some(post) = rx.recv() => {
-                    batch.push(post);
-                    if batch.len() >= 50 {
-                        info!("batch full, publishing posts {}", batch.len());
-                        publish_batch(&mut redis_publisher, &redis_channel, &mut batch).await;
+                    Some(post) = rx.recv() => {
+                        batch.push(post);
+                        if batch.len() >= 50 {
+                            info!("batch full, publishing posts {}", batch.len());
+                            publish_batch(&mut redis_publisher, &redis_channel, &mut batch).await;
+                        }
                     }
                 }
             }
         }
     });
+
+    let topics = [kafka_topic.as_str()];
+
+    let consumer_task = consumer.run(&topics, move |post: Post| {
+        let tx = tx.clone();
+        async move {
+            tx.send(post)
+                .await
+                .map_err(|e| Error::Generic(e.to_string()))
+        }
+    });
+
+    info!(
+        "Now consuming from '{}' and publishing to Redis channel '{}'",
+        kafka_topic, redis_channel
+    );
+    tokio::try_join!(aggregate_task, async {
+        consumer_task.await;
+        Ok(())
+    })?;
     Ok(())
 }
 

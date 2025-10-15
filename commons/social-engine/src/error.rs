@@ -16,4 +16,7 @@ pub enum Error {
 
     #[error(transparent)]
     ServiceRegistry(#[from] SRCError),
+
+    #[error("{0}")]
+    Generic(String),
 }
