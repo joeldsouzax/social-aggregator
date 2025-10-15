@@ -11,11 +11,11 @@ homepage.workspace = true
 
 [dependencies]
 prost.workspace = true
-tokio.workspace = true
-tracing.workspace = true
 proto-definitions.workspace = true
 rdkafka.workspace = true
 schema_registry_converter.workspace = true
-url.workspace = true
 thiserror.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+url.workspace = true
 workspace-hack.workspace = true

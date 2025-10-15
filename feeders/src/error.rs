@@ -1,6 +1,5 @@
-use prost::EncodeError;
 use rdkafka::error::KafkaError;
-use schema_registry_converter::error::SRCError;
+use social_engine::error::Error as EngineError;
 use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
@@ -14,12 +13,6 @@ pub enum Error {
     #[error(transparent)]
     Producer(#[from] KafkaError),
 
-    #[error("Could not send error to kafka: `{0}`")]
-    FeederSend(String),
-
     #[error(transparent)]
-    Encode(#[from] EncodeError),
-
-    #[error(transparent)]
-    ServiceRegistry(#[from] SRCError),
+    Engine(#[from] EngineError),
 }

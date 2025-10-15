@@ -110,7 +110,6 @@
         ## crates
         ## personal scripts
         ##
-        ##
         jikkou = pkgs.stdenv.mkDerivation rec {
           pname = "jikkou";
           version = "0.36.4";

@@ -1,8 +1,6 @@
 use anyhow::Result;
-use feeders::{
-    feeder::{SocialFeeder, builder::SocialEngineBuilder},
-    socials::mastodon::Mastodon,
-};
+use feeders::socials::Mastodon;
+use social_engine::{SocialFeeder, engine::SocialEngineBuilder};
 use std::env;
 use tracing::{info, instrument};
 use tracing_subscriber::{

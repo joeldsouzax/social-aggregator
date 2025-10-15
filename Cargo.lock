@@ -648,14 +648,12 @@ name = "feeders"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "chrono",
  "futures-util",
  "megalodon",
- "prost 0.14.1",
  "prost-types 0.14.1",
  "proto-definitions",
  "rdkafka",
- "schema_registry_converter",
+ "social-engine",
  "testcontainers",
  "testcontainers-modules",
  "thiserror 2.0.17",
@@ -2859,6 +2857,10 @@ checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 [[package]]
 name = "social-consumer"
 version = "0.1.0"
+dependencies = [
+ "social-engine",
+ "workspace-hack",
+]
 
 [[package]]
 name = "social-engine"
@@ -4221,6 +4223,7 @@ dependencies = [
  "bytes",
  "either",
  "futures-channel",
+ "futures-core",
  "futures-sink",
  "futures-util",
  "getrandom 0.2.16",
@@ -4232,6 +4235,7 @@ dependencies = [
  "libc",
  "log",
  "memchr",
+ "mime_guess",
  "num-traits",
  "percent-encoding",
  "prost 0.14.1",
@@ -4239,6 +4243,7 @@ dependencies = [
  "regex",
  "regex-automata",
  "regex-syntax",
+ "reqwest 0.12.23",
  "rustix",
  "rustls 0.23.32",
  "rustls-webpki 0.103.7",

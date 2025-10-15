@@ -10,3 +10,5 @@ description.workspace = true
 homepage.workspace = true
 
 [dependencies]
+social-engine.workspace = true
+workspace-hack.workspace = true

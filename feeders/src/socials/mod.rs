@@ -1,3 +1,3 @@
 pub mod mastodon;
 
-use mastodon::Mastodon;
+pub use mastodon::Mastodon;
