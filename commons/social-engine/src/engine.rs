@@ -121,7 +121,7 @@ impl<'a> SocialEngineBuilder<SocialDecoder<'a>> {
         brokers: S,
     ) -> Result<SocialEngineBuilder<SocialConsumer<'a>>, Error> {
         let consumer = ClientConfig::new()
-            .set("group.id", "testcontainer-rs")
+            .set("group.id", "testcontainer-rs") // FIXME: change it.
             .set("bootstrap.servers", brokers.as_ref())
             .set("session.timeout.ms", "6000")
             .set("enable.auto.commit", "false")
@@ -236,7 +236,7 @@ impl<'a> SocialEngineBuilder<SocialProducer<'a>> {
 
 impl<'a, T> MultiSocialProducer<'a, T>
 where
-    T: Debug + Message + PostId,
+    T: Debug + ProstMessage + PostId,
 {
     pub async fn run(self, topic: &str) -> Result<(), Error> {
         let MultiSocialProducer {

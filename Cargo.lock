@@ -4271,6 +4271,7 @@ dependencies = [
  "log",
  "memchr",
  "mime_guess",
+ "num-bigint",
  "num-traits",
  "percent-encoding",
  "prost 0.14.1",

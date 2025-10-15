@@ -30,6 +30,7 @@ indexmap = { version = "2", features = ["serde"] }
 log = { version = "0.4", default-features = false, features = ["std"] }
 memchr = { version = "2" }
 mime_guess = { version = "2" }
+num-bigint = { version = "0.4" }
 num-traits = { version = "0.2", default-features = false, features = ["i128", "std"] }
 percent-encoding = { version = "2" }
 prost = { version = "0.14" }
