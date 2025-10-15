@@ -1,11 +1,14 @@
 use super::queue::FeederQueue;
 use crate::error::Error;
-use prost::Message;
+use prost::Message as ProstMessage;
 use proto_definitions::PostId;
 use rdkafka::{
+    Message,
     config::ClientConfig,
+    consumer::{CommitMode, Consumer, StreamConsumer},
     producer::{FutureProducer, FutureRecord},
 };
+
 use schema_registry_converter::async_impl::proto_raw::{ProtoRawDecoder, ProtoRawEncoder};
 use schema_registry_converter::async_impl::schema_registry::SrSettings;
 use schema_registry_converter::schema_registry_common::SubjectNameStrategy;
@@ -14,7 +17,7 @@ use std::{
     time::Duration,
 };
 use tokio::sync::mpsc::{Receiver, channel};
-use tracing::{debug, instrument};
+use tracing::{debug, info, instrument, warn};
 use url::Url;
 
 pub trait SocialEngine {}
@@ -48,6 +51,13 @@ impl<'a> Debug for SocialProducer<'a> {
 }
 
 impl<'a> SocialEngine for SocialProducer<'a> {}
+
+pub struct SocialConsumer<'a> {
+    decoder: ProtoRawDecoder<'a>,
+    consumer: StreamConsumer,
+}
+
+impl<'a> SocialEngine for SocialConsumer<'a> {}
 
 #[derive(Debug)]
 pub struct Start;
@@ -104,9 +114,98 @@ impl<'a> SocialEngineBuilder<SocialEncoder<'a>> {
     }
 }
 
+impl<'a> SocialEngineBuilder<SocialDecoder<'a>> {
+    #[instrument(level = "debug", skip(brokers, self) err)]
+    pub fn with_consumer<S: AsRef<str>>(
+        self,
+        brokers: S,
+    ) -> Result<SocialEngineBuilder<SocialConsumer<'a>>, Error> {
+        let consumer = ClientConfig::new()
+            .set("group.id", "testcontainer-rs")
+            .set("bootstrap.servers", brokers.as_ref())
+            .set("session.timeout.ms", "6000")
+            .set("enable.auto.commit", "false")
+            .set("auto.offset.reset", "earliest")
+            .create::<StreamConsumer>()?;
+
+        let decoder = self.inner.decoder;
+        Ok(SocialEngineBuilder {
+            inner: SocialConsumer { decoder, consumer },
+        })
+    }
+}
+
+impl<'a> SocialEngineBuilder<SocialConsumer<'a>> {
+    pub fn build(self) -> SocialConsumer<'a> {
+        self.inner
+    }
+}
+
+impl<'a> SocialConsumer<'a> {
+    pub async fn run<T, F, Fut>(self, topics: &[&str], f: F)
+    where
+        T: Debug + ProstMessage + Default,
+        F: Fn(T) -> Fut,
+        Fut: Future<Output = Result<(), Error>>,
+    {
+        let SocialConsumer { decoder, consumer } = self;
+        consumer
+            .subscribe(topics)
+            .expect("Failed to subscribe to Kafka topics");
+
+        info!(
+            "Consumer started. Listening for messages on topics: {:?}",
+            topics
+        );
+
+        loop {
+            match consumer.recv().await {
+                Err(e) => warn!("Kafka error: {}", e),
+                Ok(m) => {
+                    let Some(_) = m.payload() else {
+                        warn!("Received message with empty payload, skipping.");
+                        continue;
+                    };
+                    let decoded_message = match decoder.decode(m.payload()).await {
+                        Ok(msg) => msg,
+                        Err(e) => {
+                            warn!("Schema registry decoding error: {}. Skipping message.", e);
+                            continue;
+                        }
+                    };
+
+                    let Some(decoded_message) = decoded_message else {
+                        warn!("Received message with empty payload, skipping.");
+                        continue;
+                    };
+                    let final_message = match T::decode(&*decoded_message.bytes) {
+                        Ok(msg) => msg,
+                        Err(e) => {
+                            warn!("Protobuf decoding error: {}. Skipping message.", e);
+                            continue;
+                        }
+                    };
+
+                    info!("Successfully decoded message: {:?}", final_message);
+                    if let Err(e) = f(final_message).await {
+                        warn!(
+                            "Error processing message: {}. Message will not be committed.",
+                            e
+                        );
+                        continue;
+                    }
+                    if let Err(e) = consumer.commit_message(&m, CommitMode::Async) {
+                        warn!("Failed to commit offset: {}", e);
+                    }
+                }
+            };
+        }
+    }
+}
+
 pub struct MultiSocialProducer<'a, T>
 where
-    T: Debug + Message + PostId,
+    T: Debug + ProstMessage + PostId,
 {
     producer: FutureProducer,
     encoder: ProtoRawEncoder<'a>,
@@ -120,7 +219,7 @@ impl<'a> SocialEngineBuilder<SocialProducer<'a>> {
 
     pub fn build_multi<T>(self, buffer: usize) -> (MultiSocialProducer<'a, T>, FeederQueue<T>)
     where
-        T: Debug + Message + PostId,
+        T: Debug + ProstMessage + PostId,
     {
         let SocialProducer { producer, encoder } = self.inner;
         let (tx, rx) = channel::<T>(buffer);
