@@ -1,10 +1,11 @@
 use anyhow::Result;
-use proto_definitions::social::v1::Post;
-use redis::aio::MultiplexedConnection;
+use prost::Message;
+use proto_definitions::social::v1::{Post, PostBatch};
+use redis::{AsyncCommands, RedisResult, aio::MultiplexedConnection};
 use social_engine::engine::SocialEngineBuilder;
 use std::{env, time::Duration};
 use tokio::{sync::mpsc, time::interval};
-use tracing::{info, instrument};
+use tracing::{error, info, instrument};
 use tracing_subscriber::{
     EnvFilter, Layer,
     fmt::{self, format::FmtSpan},
@@ -47,14 +48,14 @@ async fn main() -> Result<()> {
                 _ = ticker.tick() => {
                     if !batch.is_empty() {
                         info!("timer ticked, publishing {} posts", batch.len());
-                        // TODO: publish
+                        publish_batch(&mut redis_publisher, &redis_channel, &mut batch).await;
                     }
                 }
                 Some(post) = rx.recv() => {
                     batch.push(post);
                     if batch.len() >= 50 {
                         info!("batch full, publishing posts {}", batch.len());
-                        // TODO: publish
+                        publish_batch(&mut redis_publisher, &redis_channel, &mut batch).await;
                     }
                 }
             }
@@ -63,10 +64,21 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
-async fn publish_bastch(
+#[instrument]
+async fn publish_batch(
     redis_conn: &mut MultiplexedConnection,
     channel: &str,
     batch: &mut Vec<Post>,
 ) {
-    unimplemented!()
+    let posts = PostBatch {
+        posts: std::mem::take(batch),
+    };
+
+    let mut buffer = Vec::new();
+    if posts.encode(&mut buffer).is_ok() {
+        let result: RedisResult<()> = redis_conn.publish(channel, buffer).await;
+        if let Err(e) = result {
+            error!("Failed to publish to Redis: {}", e);
+        }
+    }
 }

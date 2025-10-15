@@ -2901,6 +2901,7 @@ name = "social-consumer"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "prost 0.14.1",
  "proto-definitions",
  "redis",
  "social-engine",
