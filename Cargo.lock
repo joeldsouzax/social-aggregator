@@ -393,7 +393,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba5a308b75df32fe02788e748662718f03fde005016435c444eea572398219fd"
 dependencies = [
  "bytes",
+ "futures-core",
  "memchr",
+ "pin-project-lite",
+ "tokio",
+ "tokio-util",
 ]
 
 [[package]]
@@ -2246,13 +2250,19 @@ version = "0.32.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "014cc767fefab6a3e798ca45112bccad9c6e0e218fbd49720042716c73cfef44"
 dependencies = [
+ "bytes",
+ "cfg-if",
  "combine",
+ "futures-util",
  "itoa",
  "num-bigint",
  "percent-encoding",
+ "pin-project-lite",
  "ryu",
  "sha1_smol",
  "socket2 0.6.1",
+ "tokio",
+ "tokio-util",
  "url",
 ]
 
@@ -2891,11 +2901,13 @@ name = "social-consumer"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "proto-definitions",
  "redis",
  "social-engine",
  "tokio",
  "tracing",
  "tracing-subscriber",
+ "url",
  "workspace-hack",
 ]
 

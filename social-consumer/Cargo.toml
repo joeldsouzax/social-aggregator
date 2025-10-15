@@ -17,3 +17,5 @@ tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 workspace-hack.workspace = true
+proto-definitions.workspace = true
+url.workspace = true

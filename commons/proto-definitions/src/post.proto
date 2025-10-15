@@ -15,3 +15,8 @@ enum Service {
   MASTODON = 0;
   X = 1;
 }
+
+
+message PostBatch {
+  repeated Post posts = 1;
+}
