@@ -26,6 +26,7 @@ utoipa-axum.workspace = true
 utoipa-swagger-ui.workspace = true
 utoipa-swagger-ui-vendored.workspace = true
 validator.workspace = true
+redis.workspace = true
 workspace-hack.workspace = true
 
 [dev-dependencies]

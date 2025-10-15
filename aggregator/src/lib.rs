@@ -6,17 +6,27 @@ use axum::{
     http::{HeaderValue, Method},
     routing::get,
 };
+use std::env;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 
+#[derive(Clone)]
+struct AppState {
+    redis_client: redis::Client,
+}
+
 pub fn router() -> OpenApiRouter {
     let cors_origin = "http://localhost:5173".parse::<HeaderValue>().unwrap();
+    let redis_url = env::var("REDIS_URL").expect("REDIS_URL must be set");
+    let redis_client = redis::Client::open(redis_url).expect("Failed to create Redis client");
+    let app_state = AppState { redis_client };
 
     OpenApiRouter::new()
         .route("/sse", get(routes::sse))
         .route("/health", get(routes::health))
         .fallback(routes::not_found)
+        .with_state(app_state)
         .layer(
             CorsLayer::new()
                 .allow_origin(cors_origin)
