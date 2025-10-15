@@ -12,12 +12,14 @@ members = [
 [workspace.dependencies]
 anyhow = "1.0.100"
 axum = { version = "0.8.6", features = ["ws", "macros", "json"] }
-chrono = "0.4.42"
+axum-extra = { version = "0.10.3", features = ["typed-header"] }
+chrono = { version = "0.4.42", features = ["serde"] }
 futures-util = "0.3.31"
+headers = "0.4.1"
 megalodon = "1.0.3"
 prost = "0.14.1"
 prost-build = "0.14.1"
-prost-types = "0.14.1"
+prost-types = { version = "0.14.1", features = ["chrono"] }
 proto-definitions = { version = "0.1.0", path = "commons/proto-definitions" }
 rdkafka = { version = "0.38.0", features = ["cmake-build"] }
 redis = { version = "0.32.7", features = ["aio", "tokio-comp"] }
@@ -37,8 +39,6 @@ utoipa-axum = { version = "0.2.0", features = ["debug"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum", "vendored"] }
 utoipa-swagger-ui-vendored = "0.1.2"
 validator = { version = "0.20.0", features = ["derive"] }
-axum-extra = { version = "0.10.3", features = ["typed-header"] }
-headers = "0.4.1"
 workspace-hack = { version = "0.1.0", path = "commons/workspace-hack" }
 
 [workspace.package]

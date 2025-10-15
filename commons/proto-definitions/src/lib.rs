@@ -7,6 +7,8 @@ pub mod social {
     }
 }
 
+pub mod prost_timestamp_serde;
+
 pub use social::v1;
 
 impl PostId for social::v1::Post {

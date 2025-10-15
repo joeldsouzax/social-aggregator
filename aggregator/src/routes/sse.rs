@@ -4,11 +4,12 @@ use axum::{
     response::sse::{Event, KeepAlive, Sse},
 };
 use axum_extra::TypedHeader;
-use futures_util::stream::{self, Stream};
+use futures_util::stream::{self, Stream, StreamExt};
 use headers::{Header, HeaderName, HeaderValue};
-use std::{convert::Infallible, time::Duration};
-use tokio_stream::StreamExt as _;
-use tracing::instrument;
+use prost::Message;
+use proto_definitions::v1::PostBatch;
+use std::{convert::Infallible, env};
+use tracing::{error, instrument};
 
 #[utoipa::path(get,
                path = "/sse",
@@ -23,10 +24,45 @@ pub async fn route(
     State(state): State<AppState>,
     TypedHeader(last_event_id): TypedHeader<LastEventId>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
-    let stream = stream::repeat_with(|| Event::default().data("some post information"))
-        .map(Ok)
-        .throttle(Duration::from_secs(1));
+    let redis_channel = env::var("REDIS_CHANNEL").unwrap_or_else(|_| "posts.live".to_string());
+    let mut pubsub = state
+        .redis_client
+        .get_async_pubsub()
+        .await
+        .expect("Failed to get redis pubsub connection");
+    pubsub
+        .subscribe(&redis_channel)
+        .await
+        .expect("Failed to subscribe to channel");
 
+    let stream = stream::unfold(pubsub, |mut pubsub| async {
+        loop {
+            let msg = pubsub.on_message().next().await?;
+            let payload: Vec<u8> = match msg.get_payload() {
+                Ok(payload) => payload,
+                Err(e) => {
+                    error!("Failed to get payload from Redis message: {}", e);
+                    continue;
+                }
+            };
+            let post_batch = match PostBatch::decode(payload.as_slice()) {
+                Ok(batch) => batch,
+                Err(e) => {
+                    error!("Failed to decode Protobuf message: {}", e);
+                    continue;
+                }
+            };
+            let json_payload = match serde_json::to_string(&post_batch) {
+                Ok(json) => json,
+                Err(e) => {
+                    error!("Failed to serialize PostBatch to JSON: {}", e);
+                    continue;
+                }
+            };
+            let event = Event::default().data(json_payload);
+            return Some((Ok(event), pubsub));
+        }
+    });
     Sse::new(stream).keep_alive(KeepAlive::default())
 }
 
@@ -80,5 +116,3 @@ mod test {
     //
     //
 }
-
-// TODO: connect kafka here and get posts from kafka,
