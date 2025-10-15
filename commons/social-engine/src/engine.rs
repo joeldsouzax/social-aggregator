@@ -6,7 +6,7 @@ use rdkafka::{
     config::ClientConfig,
     producer::{FutureProducer, FutureRecord},
 };
-use schema_registry_converter::async_impl::proto_raw::ProtoRawEncoder;
+use schema_registry_converter::async_impl::proto_raw::{ProtoRawDecoder, ProtoRawEncoder};
 use schema_registry_converter::async_impl::schema_registry::SrSettings;
 use schema_registry_converter::schema_registry_common::SubjectNameStrategy;
 use std::{
@@ -25,6 +25,13 @@ pub struct SocialEncoder<'a> {
 }
 
 impl<'a> SocialEngine for SocialEncoder<'a> {}
+
+#[derive(Debug)]
+pub struct SocialDecoder<'a> {
+    decoder: ProtoRawDecoder<'a>,
+}
+
+impl<'a> SocialEngine for SocialDecoder<'a> {}
 
 pub struct SocialProducer<'a> {
     producer: FutureProducer,
@@ -63,6 +70,16 @@ impl SocialEngineBuilder<Start> {
         let encoder = ProtoRawEncoder::new(sr_settings);
         SocialEngineBuilder {
             inner: SocialEncoder { encoder },
+        }
+    }
+
+    #[instrument(level = "debug")]
+    pub fn decoder<'a>(url: Url) -> SocialEngineBuilder<SocialDecoder<'a>> {
+        debug!("setting schema registry at: {}", url);
+        let sr_settings = SrSettings::new(url.to_string());
+        let decoder = ProtoRawDecoder::new(sr_settings);
+        SocialEngineBuilder {
+            inner: SocialDecoder { decoder },
         }
     }
 }

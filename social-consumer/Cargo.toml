@@ -10,5 +10,8 @@ description.workspace = true
 homepage.workspace = true
 
 [dependencies]
+redis.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
 social-engine.workspace = true
 workspace-hack.workspace = true
