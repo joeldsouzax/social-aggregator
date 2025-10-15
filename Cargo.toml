@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["aggregator", "commons/proto-definitions", "commons/workspace-hack", "feeders", "social-consumer"]
+members = ["aggregator", "commons/proto-definitions", "commons/social-engine", "commons/workspace-hack", "feeders", "social-consumer"]
 
 [workspace.dependencies]
 anyhow = "1.0.100"
