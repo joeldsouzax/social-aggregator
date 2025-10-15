@@ -18,3 +18,4 @@ rdkafka.workspace = true
 schema_registry_converter.workspace = true
 url.workspace = true
 thiserror.workspace = true
+workspace-hack.workspace = true

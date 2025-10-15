@@ -28,6 +28,7 @@ utoipa-axum = { version = "0.2.0", features = ["debug"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["axum", "vendored"] }
 utoipa-swagger-ui-vendored = "0.1.2"
 validator = { version = "0.20.0", features = ["derive"] }
+social-engine = { version = "0.1.0", path = "commons/social-engine" }
 workspace-hack = { version = "0.1.0", path = "commons/workspace-hack" }
 
 [workspace.package]

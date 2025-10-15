@@ -5,6 +5,9 @@ use thiserror::Error as ThisError;
 
 #[derive(Debug, ThisError)]
 pub enum Error {
+    #[error("Could not send error to kafka: `{0}`")]
+    FeederSend(String),
+
     #[error(transparent)]
     Producer(#[from] KafkaError),
 

@@ -70,8 +70,10 @@
             ./Cargo.toml
             ./Cargo.lock
             (craneLib.fileset.commonCargoSources ./feeders)
+            (craneLib.fileset.commonCargoSources ./social-consumer)
             (craneLib.fileset.commonCargoSources ./aggregator)
             (craneLib.fileset.commonCargoSources ./commons/proto-definitions)
+            (craneLib.fileset.commonCargoSources ./commons/social-engine)
             (craneLib.fileset.commonCargoSources ./commons/workspace-hack)
             protoFiles
           ];
@@ -234,10 +236,10 @@
 
         feeders = mkPackage "feeders";
         aggregator = mkPackage "aggregator";
-
+        consumer = mkPackage "social-consumer";
       in with pkgs; {
         checks = {
-          inherit feeders aggregator;
+          inherit feeders aggregator consumer;
           clippy = craneLib.cargoClippy (commonArgs // {
             inherit cargoArtifacts;
             cargoClippyExtraArgs = "--all-targets -- --deny warnings";
@@ -289,7 +291,7 @@
         };
 
         packages = {
-          inherit feeders aggregator pu pd i jikkou;
+          inherit feeders aggregator consumer pu pd i jikkou;
           ## integration test for auth
           integration = pkgs.testers.runNixOSTest ({
             name = "integration-test";
