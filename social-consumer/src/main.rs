@@ -1,6 +1,6 @@
 use anyhow::Result;
 use proto_definitions::social::v1::Post;
-use redis::{AsyncCommand, aio::MultiplexedConnection};
+use redis::aio::MultiplexedConnection;
 use social_engine::engine::SocialEngineBuilder;
 use std::{env, time::Duration};
 use tokio::{sync::mpsc, time::interval};
