@@ -2863,6 +2863,16 @@ version = "0.1.0"
 [[package]]
 name = "social-engine"
 version = "0.1.0"
+dependencies = [
+ "prost 0.14.1",
+ "proto-definitions",
+ "rdkafka",
+ "schema_registry_converter",
+ "thiserror 2.0.17",
+ "tokio",
+ "tracing",
+ "url",
+]
 
 [[package]]
 name = "socket2"
