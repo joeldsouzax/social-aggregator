@@ -1,6 +1,11 @@
-use axum::response::sse::{Event, KeepAlive, Sse};
+use crate::AppState;
+use axum::{
+    extract::State,
+    response::sse::{Event, KeepAlive, Sse},
+};
+use axum_extra::TypedHeader;
 use futures_util::stream::{self, Stream};
-
+use headers::{Header, HeaderName, HeaderValue};
 use std::{convert::Infallible, time::Duration};
 use tokio_stream::StreamExt as _;
 use tracing::instrument;
@@ -14,7 +19,10 @@ use tracing::instrument;
                )
 )]
 #[instrument(name = "sse", target = "api::sse")]
-pub async fn route() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
+pub async fn route(
+    State(state): State<AppState>,
+    TypedHeader(last_event_id): TypedHeader<LastEventId>,
+) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     let stream = stream::repeat_with(|| Event::default().data("some post information"))
         .map(Ok)
         .throttle(Duration::from_secs(1));
@@ -22,9 +30,33 @@ pub async fn route() -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     Sse::new(stream).keep_alive(KeepAlive::default())
 }
 
-// two events,
-// 1 - test events
-// 2 - post events
+static LAST_EVENT_ID: HeaderName = HeaderName::from_static("last-event-id");
+#[derive(Debug, Clone)]
+pub struct LastEventId(String);
+
+impl Header for LastEventId {
+    fn name() -> &'static HeaderName {
+        &LAST_EVENT_ID
+    }
+
+    fn decode<'i, I>(values: &mut I) -> Result<Self, headers::Error>
+    where
+        I: Iterator<Item = &'i HeaderValue>,
+    {
+        let value = values.next().ok_or_else(headers::Error::invalid)?;
+        let s = value.to_str().map_err(|_| headers::Error::invalid())?;
+        Ok(LastEventId(s.to_owned()))
+    }
+
+    fn encode<E>(&self, values: &mut E)
+    where
+        E: Extend<HeaderValue>,
+    {
+        if let Ok(value) = HeaderValue::from_str(&self.0) {
+            values.extend(std::iter::once(value));
+        }
+    }
+}
 
 #[cfg(test)]
 mod test {

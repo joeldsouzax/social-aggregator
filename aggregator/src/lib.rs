@@ -11,7 +11,7 @@ use tower_http::{cors::CorsLayer, trace::TraceLayer};
 use utoipa::OpenApi;
 use utoipa_axum::router::OpenApiRouter;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct AppState {
     redis_client: redis::Client,
 }

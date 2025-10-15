@@ -12,7 +12,10 @@ homepage.workspace = true
 [dependencies]
 anyhow.workspace = true
 axum.workspace = true
+axum-extra.workspace = true
 futures-util.workspace = true
+headers.workspace = true
+redis.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 thiserror.workspace = true
@@ -26,7 +29,6 @@ utoipa-axum.workspace = true
 utoipa-swagger-ui.workspace = true
 utoipa-swagger-ui-vendored.workspace = true
 validator.workspace = true
-redis.workspace = true
 workspace-hack.workspace = true
 
 [dev-dependencies]
