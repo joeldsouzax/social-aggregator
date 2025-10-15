@@ -1,6 +1,7 @@
-use super::{PostId, queue::FeederQueue};
+use super::queue::FeederQueue;
 use crate::error::Error;
 use prost::Message;
+use proto_definitions::PostId;
 use rdkafka::{
     config::ClientConfig,
     producer::{FutureProducer, FutureRecord},
@@ -33,9 +34,7 @@ pub struct SocialProducer<'a> {
 impl<'a> Debug for SocialProducer<'a> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("SocialProducer")
-            // We use a placeholder because FutureProducer doesn't implement Debug.
             .field("producer", &"<FutureProducer>")
-            // This assumes ProtoRawEncoder implements Debug.
             .field("encoder", &self.encoder)
             .finish()
     }
@@ -69,6 +68,7 @@ impl SocialEngineBuilder<Start> {
 }
 
 impl<'a> SocialEngineBuilder<SocialEncoder<'a>> {
+    // TODO: shold take username and password?
     #[instrument(level = "debug", skip(brokers, self) err)]
     pub fn with_producer<S: AsRef<str>>(
         self,

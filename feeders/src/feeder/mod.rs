@@ -10,7 +10,3 @@ pub trait SocialFeeder {
     type Message: Message + Debug;
     fn stream(self, queue: FeederQueue<Self::Message>) -> impl Future<Output = ()>;
 }
-
-pub trait PostId {
-    fn id(&self) -> String;
-}

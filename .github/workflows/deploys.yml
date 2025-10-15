@@ -35,7 +35,7 @@ jobs:
           purge-prefixes: cache-${{ runner.os }}-
           purge-created: 0
           purge-primary-key: never
-      - name: Build and Push Image using Nix App
+      - name: Build and Push Feeders
         env:
           REGISTRY_URL: ghcr.io
           REGISTRY_USER: ${{ github.actor }}
@@ -45,4 +45,15 @@ jobs:
           PUSH_LATEST_TAG: ${{ github.ref == 'refs/heads/main' }}
         run: |
           echo "Attempting to push image for commit ${{ github.sha }}..."
-          nix -L run .#social-feeders
+          nix -L run .#feeders
+      - name: Build and Push aggregator
+        env:
+          REGISTRY_URL: ghcr.io
+          REGISTRY_USER: ${{ github.actor }}
+          REGISTRY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          IMAGE_NAME: ${{ github.repository_owner }}/${{ github.event.repository.name }}/auth
+          IMAGE_TAG: ${{ github.sha }}
+          PUSH_LATEST_TAG: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          echo "Attempting to push image for commit ${{ github.sha }}..."
+          nix -L run .#aggregator
