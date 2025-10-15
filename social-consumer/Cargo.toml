@@ -10,8 +10,10 @@ description.workspace = true
 homepage.workspace = true
 
 [dependencies]
+anyhow.workspace = true
 redis.workspace = true
 social-engine.workspace = true
+tokio.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 workspace-hack.workspace = true
