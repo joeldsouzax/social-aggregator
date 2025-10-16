@@ -302,7 +302,7 @@
         apps = {
           aggregator = mkApp "aggregator";
           feeders = mkApp "feeders";
-          consumer = mkApp "consumer";
+          consumer = mkApp "social-consumer";
         };
 
         devShells.default = craneLib.devShell {

@@ -18,7 +18,11 @@ struct AppState {
 
 pub fn router() -> OpenApiRouter {
     let cors_origin = "http://localhost:5173".parse::<HeaderValue>().unwrap();
-    let redis_url = env::var("REDIS_URL").expect("REDIS_URL must be set");
+    let redis_host = env::var("REDIS_HOST").unwrap_or_else(|_| "redis".to_string());
+    let redis_port = env::var("REDIS_PORT").unwrap_or_else(|_| "6379".to_string());
+    let redis_password = env::var("REDIS_PASSWORD").expect("REDIS_PASSWORD must be set"); // Or handle the error gracefully
+    let redis_url = format!("redis://:{}@{}:{}", redis_password, redis_host, redis_port);
+
     let redis_client = redis::Client::open(redis_url).expect("Failed to create Redis client");
     let app_state = AppState { redis_client };
 
