@@ -23,7 +23,7 @@ prost-types = { version = "0.14.1", features = ["chrono"] }
 proto-definitions = { version = "0.1.0", path = "commons/proto-definitions" }
 rdkafka = { version = "0.38.0", features = ["cmake-build"] }
 redis = { version = "0.32.7", features = ["aio", "tokio-comp"] }
-schema_registry_converter = { version = "4.6.0", features = ["proto_raw", "easy"] }
+schema_registry_converter = { version = "4.6.0",  default-features = false, features = ["proto_raw", "easy", "futures", "rustls_tls", "proto_decoder"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.145"
 social-engine = { version = "0.1.0", path = "commons/social-engine" }

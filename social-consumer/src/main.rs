@@ -30,10 +30,14 @@ async fn main() -> Result<()> {
     let redis_url = env::var("REDIS_URL").expect("REDIS_URL must be set");
     let kafka_topic = env::var("KAFKA_TOPIC").unwrap_or_else(|_| "social.posts".to_string());
     let redis_channel = env::var("REDIS_CHANNEL").unwrap_or_else(|_| "posts.live".to_string());
+    let kafka_username =
+        env::var("KAFKA_USERNAME").expect("Missing required environment variable: KAFKA_USERNAME");
+    let kafka_password =
+        env::var("KAFKA_PASSWORD").expect("Missing required environment variable: KAFKA_PASSWORD");
 
     let schema_url = Url::parse(&schema_registry_url)?;
     let consumer = SocialEngineBuilder::decoder(schema_url)
-        .with_consumer(&kafka_brokers)?
+        .with_consumer(&kafka_brokers, &kafka_username, &kafka_password)?
         .build();
     let redis_client = redis::Client::open(redis_url)?;
     let redis_conn = redis_client.get_multiplexed_async_connection().await?;

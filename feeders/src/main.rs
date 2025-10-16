@@ -36,13 +36,17 @@ async fn main() -> Result<()> {
         env::var("KAFKA_BROKERS").expect("Missing required environment variable: KAFKA_BROKERS");
     let kafka_topic =
         env::var("KAFKA_TOPIC").expect("Missing required environment variable: KAFKA_TOPIC");
+    let kafka_username =
+        env::var("KAFKA_USERNAME").expect("Missing required environment variable: KAFKA_USERNAME");
+    let kafka_password =
+        env::var("KAFKA_PASSWORD").expect("Missing required environment variable: KAFKA_PASSWORD");
 
     info!(url = %mastodon_url, "Initializing Mastodon feeder client...");
     let mastodon_feeder = Mastodon::new(mastodon_url, mastodon_token)?;
 
     info!(brokers = %kafka_brokers, "Initializing Kafka producer with schema registry...");
     let (producer, queue) = SocialEngineBuilder::encoder(schema_registry_url)
-        .with_producer(&kafka_brokers)?
+        .with_producer(&kafka_brokers, &kafka_username, &kafka_password)?
         .build_multi(100);
 
     info!(topic = %kafka_topic, "Starting feeder and producer tasks. Streaming live posts...");

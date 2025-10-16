@@ -96,15 +96,21 @@ impl SocialEngineBuilder<Start> {
 
 impl<'a> SocialEngineBuilder<SocialEncoder<'a>> {
     // TODO: shold take username and password?
-    #[instrument(level = "debug", skip(brokers, self) err)]
+    #[instrument(level = "debug", skip(brokers, self, username, password) err)]
     pub fn with_producer<S: AsRef<str>>(
         self,
         brokers: S,
+        username: S,
+        password: S,
     ) -> Result<SocialEngineBuilder<SocialProducer<'a>>, Error> {
         debug!("creating a producer targeted at: {}", brokers.as_ref());
         let producer: FutureProducer = ClientConfig::new()
             .set("bootstrap.servers", brokers.as_ref())
             .set("message.timeout.ms", "5000")
+            .set("sasl.mechanism", "PLAIN")
+            .set("security.protocol", "SASL_PLAINTEXT")
+            .set("sasl.username", username.as_ref())
+            .set("sasl.password", password.as_ref())
             .create()?;
 
         let encoder = self.inner.encoder;
@@ -115,17 +121,22 @@ impl<'a> SocialEngineBuilder<SocialEncoder<'a>> {
 }
 
 impl<'a> SocialEngineBuilder<SocialDecoder<'a>> {
-    #[instrument(level = "debug", skip(brokers, self) err)]
+    #[instrument(level = "debug", skip(brokers, username, password, self) err)]
     pub fn with_consumer<S: AsRef<str>>(
         self,
         brokers: S,
+        username: S,
+        password: S,
     ) -> Result<SocialEngineBuilder<SocialConsumer<'a>>, Error> {
         let consumer = ClientConfig::new()
-            .set("group.id", "testcontainer-rs") // FIXME: change it.
             .set("bootstrap.servers", brokers.as_ref())
             .set("session.timeout.ms", "6000")
             .set("enable.auto.commit", "false")
             .set("auto.offset.reset", "earliest")
+            .set("sasl.mechanism", "PLAIN")
+            .set("security.protocol", "SASL_PLAINTEXT")
+            .set("sasl.username", username.as_ref())
+            .set("sasl.password", password.as_ref())
             .create::<StreamConsumer>()?;
 
         let decoder = self.inner.decoder;
