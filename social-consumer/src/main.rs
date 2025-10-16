@@ -5,7 +5,7 @@ use redis::{AsyncCommands, RedisResult, aio::MultiplexedConnection};
 use social_engine::{engine::SocialEngineBuilder, error::Error};
 use std::{env, time::Duration};
 use tokio::{sync::mpsc, time::interval};
-use tracing::{error, info, instrument};
+use tracing::{debug, error, info, instrument};
 use tracing_subscriber::{
     EnvFilter, Layer,
     fmt::{self, format::FmtSpan},
@@ -27,7 +27,11 @@ async fn main() -> Result<()> {
     let kafka_brokers = env::var("KAFKA_BROKERS").expect("KAFKA_BROKERS must be set");
     let schema_registry_url =
         env::var("SCHEMA_REGISTRY_URL").expect("SCHEMA_REGISTRY_URL must be set");
-    let redis_url = env::var("REDIS_URL").expect("REDIS_URL must be set");
+    let redis_host = env::var("REDIS_HOST").unwrap_or_else(|_| "redis".to_string());
+    let redis_port = env::var("REDIS_PORT").unwrap_or_else(|_| "6379".to_string());
+    let redis_password = env::var("REDIS_PASSWORD").expect("REDIS_PASSWORD must be set"); // Or handle the error gracefully
+    let redis_url = format!("redis://:{}@{}:{}", redis_password, redis_host, redis_port);
+    debug!(%redis_url);
     let kafka_topic = env::var("KAFKA_TOPIC").unwrap_or_else(|_| "social.posts".to_string());
     let redis_channel = env::var("REDIS_CHANNEL").unwrap_or_else(|_| "posts.live".to_string());
     let kafka_username =
@@ -35,10 +39,13 @@ async fn main() -> Result<()> {
     let kafka_password =
         env::var("KAFKA_PASSWORD").expect("Missing required environment variable: KAFKA_PASSWORD");
 
+    // GROUP_ID
+    let group_id = env::var("GROUP_ID").expect("Missing required environment variable: GROUP_ID");
     let schema_url = Url::parse(&schema_registry_url)?;
     let consumer = SocialEngineBuilder::decoder(schema_url)
-        .with_consumer(&kafka_brokers, &kafka_username, &kafka_password)?
+        .with_consumer(&kafka_brokers, &kafka_username, &kafka_password, &group_id)?
         .build();
+    debug!("consumer setup successful");
     let redis_client = redis::Client::open(redis_url)?;
     let redis_conn = redis_client.get_multiplexed_async_connection().await?;
 

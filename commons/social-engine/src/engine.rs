@@ -121,14 +121,17 @@ impl<'a> SocialEngineBuilder<SocialEncoder<'a>> {
 }
 
 impl<'a> SocialEngineBuilder<SocialDecoder<'a>> {
-    #[instrument(level = "debug", skip(brokers, username, password, self) err)]
+    #[instrument(level = "debug", skip(brokers, username, password, group_id, self) err)]
     pub fn with_consumer<S: AsRef<str>>(
         self,
         brokers: S,
         username: S,
         password: S,
+        group_id: S,
     ) -> Result<SocialEngineBuilder<SocialConsumer<'a>>, Error> {
+        debug!("creating a consumer targeted at: {}", brokers.as_ref());
         let consumer = ClientConfig::new()
+            .set("group.id", group_id.as_ref())
             .set("bootstrap.servers", brokers.as_ref())
             .set("session.timeout.ms", "6000")
             .set("enable.auto.commit", "false")
