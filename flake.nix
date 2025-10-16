@@ -299,7 +299,11 @@
           });
         };
 
-        apps = { };
+        apps = {
+          aggregator = mkApp "aggregator";
+          feeders = mkApp "feeders";
+          consumer = mkApp "consumer";
+        };
 
         devShells.default = craneLib.devShell {
           checks = self.checks.${system};
